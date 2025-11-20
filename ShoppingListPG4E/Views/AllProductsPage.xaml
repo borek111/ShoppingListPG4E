@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:ViewModels="clr-namespace:ShoppingListPG4E.ViewModels"
+             x:Class="ShoppingListPG4E.Views.AllProductsPage"
+             x:DataType="ViewModels:ProductsViewModel"
+             Title="Lista zakupów">
+
+    <!-- Toolbar z przyciskiem Add -->
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Add"
+                     IconImageSource="{FontImage Glyph='+'}" 
+                     Command="{Binding NewCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <CollectionView ItemsSource="{Binding AllProducts}" SelectionMode="None">
+        <CollectionView.ItemsLayout>
+            <LinearItemsLayout Orientation="Vertical" ItemSpacing="10"/>
+        </CollectionView.ItemsLayout>
+
+        <CollectionView.ItemTemplate>
+            <DataTemplate x:DataType="ViewModels:ProductViewModel">
+                <Frame HasShadow="True" CornerRadius="8" Padding="10"
+                       Opacity="{Binding Purchased, Converter={StaticResource BoolToOpacityConverter}}">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <!-- Lewa część: nazwa, ilość i jednostka -->
+                        <VerticalStackLayout>
+                            <Label Text="{Binding Name}" FontSize="18"/>
+                            <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                                <Label Text="{Binding Quantity}" VerticalOptions="Center"/>
+                                <Label Text="{Binding Unit}" VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+
+                        <!-- Prawa część: checkbox i delete -->
+                        <VerticalStackLayout Grid.Column="1" Spacing="6" HorizontalOptions="End">
+                            <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                <CheckBox IsChecked="{Binding Purchased, Mode=TwoWay}" />
+                                <Label Text="Kupione" VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+                            <Button Text="Del" Command="{Binding DeleteCommand}" WidthRequest="64"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                </Frame>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+    </CollectionView>
+</ContentPage>
