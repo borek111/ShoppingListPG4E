@@ -6,7 +6,7 @@ using System.Xml.Linq;
 
 namespace ShoppingListPG4E.Models
 {
-    internal class Product
+    public class Product
     {
         public string Id { get; set; } // unikalny identyfikator
         public string Name { get; set; }

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:ViewModels="clr-namespace:ShoppingListPG4E.ViewModels"
@@ -10,41 +11,24 @@
     </ContentPage.BindingContext>
 
     <VerticalStackLayout Spacing="10" Margin="10">
-        <Entry Placeholder="Nazwa produktu"
-           Text="{Binding Name, Mode=TwoWay}" />
+        <Entry Placeholder="Nazwa produktu" Text="{Binding Name, Mode=TwoWay}" />
 
-        <Picker Title="Jednostka"
-            ItemsSource="{Binding Units}"
-            SelectedItem="{Binding Unit, Mode=TwoWay}" />
+        <Label Text="Jednostka:" />
+        <Picker Title="Wybierz jednostkę"
+                ItemsSource="{Binding Units}"
+                SelectedItem="{Binding Unit, Mode=TwoWay}" />
 
-        <!-- Sekcja ilości z przyciskami + i - -->
-        <Grid ColumnDefinitions="50,*,50" ColumnSpacing="8" VerticalOptions="Center">
-            <Button Grid.Column="0"
-                Text="-"
-                Command="{Binding DecreaseCommand}"
-                HorizontalOptions="Center"
-                HeightRequest="40"/>
-            <Entry Grid.Column="1"
-               Text="{Binding Quantity, Mode=TwoWay}"
-               Keyboard="Numeric"
-               HorizontalTextAlignment="Center"
-               HorizontalOptions="Fill"
-               HeightRequest="40"
-               Margin="0"
-               BackgroundColor="{DynamicResource SecondaryColor}" />
-            <Button Grid.Column="2"
-                Text="+"
-                Command="{Binding IncreaseCommand}"
-                HorizontalOptions="Center"
-                HeightRequest="40"/>
+        <!-- Ilość z przyciskami + i - -->
+        <Grid ColumnDefinitions="50,*,50" ColumnSpacing="8">
+            <Button Grid.Column="0" Text="-" Command="{Binding DecreaseCommand}" HeightRequest="40" />
+            <Entry Grid.Column="1" Text="{Binding Quantity, Mode=TwoWay}" Keyboard="Numeric" HorizontalTextAlignment="Center" HeightRequest="40" />
+            <Button Grid.Column="2" Text="+" Command="{Binding IncreaseCommand}" HeightRequest="40" />
         </Grid>
 
-        <!-- Przycisk Add/Cancel w osobnym poziomym stacku -->
+        <!-- Add / Cancel -->
         <HorizontalStackLayout Spacing="10" Margin="0,10,0,0" HorizontalOptions="Fill">
             <Button Text="Add" Command="{Binding AddCommand}" HorizontalOptions="FillAndExpand"/>
             <Button Text="Cancel" Command="{Binding CancelCommand}" HorizontalOptions="FillAndExpand"/>
         </HorizontalStackLayout>
     </VerticalStackLayout>
-
-
 </ContentPage>
