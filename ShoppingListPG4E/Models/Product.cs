@@ -8,11 +8,12 @@ namespace ShoppingListPG4E.Models
 {
     public class Product
     {
-        public string Id { get; set; } // unikalny identyfikator
+        public string Id { get; set; } 
         public string Name { get; set; }
-        public string Unit { get; set; } // np. szt., kg, l
+        public string Unit { get; set; } 
         public double Quantity { get; set; }
-        public bool Purchased { get; set; } // czy kupione
+        public bool Purchased { get; set; } 
+        public string Category { get; set; } 
 
         private static string XmlPath => Path.Combine(FileSystem.AppDataDirectory, "ShoppingList.xml");
 
@@ -23,6 +24,7 @@ namespace ShoppingListPG4E.Models
             Unit = "szt.";
             Quantity = 1;
             Purchased = false;
+            Category = string.Empty;
         }
 
         public void Save()
@@ -40,16 +42,18 @@ namespace ShoppingListPG4E.Models
                 existing.Element("Unit").Value = Unit;
                 existing.Element("Quantity").Value = Quantity.ToString();
                 existing.Element("Purchased").Value = Purchased.ToString();
+                existing.Element("Category").Value = Category;
             }
             else
             {
                 root.Add(new XElement("Product",
-                    new XAttribute("Id", Id),
-                    new XElement("Name", Name),
-                    new XElement("Unit", Unit),
-                    new XElement("Quantity", Quantity),
-                    new XElement("Purchased", Purchased)
-                ));
+                            new XAttribute("Id", Id),
+                            new XElement("Name", Name),
+                            new XElement("Unit", Unit),
+                            new XElement("Quantity", Quantity),
+                            new XElement("Purchased", Purchased),
+                            new XElement("Category", Category)
+                        ));
             }
 
             root.Save(XmlPath);
@@ -76,10 +80,11 @@ namespace ShoppingListPG4E.Models
             return new Product
             {
                 Id = id,
-                Name = node.Element("Name").Value,
-                Unit = node.Element("Unit").Value,
-                Quantity = double.Parse(node.Element("Quantity").Value),
-                Purchased = bool.Parse(node.Element("Purchased").Value)
+                Name = node.Element("Name")?.Value ?? string.Empty,
+                Unit = node.Element("Unit")?.Value ?? "szt.",
+                Quantity = double.TryParse(node.Element("Quantity")?.Value, out var q) ? q : 1,
+                Purchased = bool.TryParse(node.Element("Purchased")?.Value, out var p) ? p : false,
+                Category = node.Element("Category")?.Value ?? string.Empty
             };
         }
 
@@ -91,14 +96,14 @@ namespace ShoppingListPG4E.Models
             var products = root.Elements("Product").Select(node => new Product
             {
                 Id = node.Attribute("Id").Value,
-                Name = node.Element("Name").Value,
-                Unit = node.Element("Unit").Value,
-                Quantity = double.Parse(node.Element("Quantity").Value),
-                Purchased = bool.Parse(node.Element("Purchased").Value)
+                Name = node.Element("Name")?.Value ?? string.Empty,
+                Unit = node.Element("Unit")?.Value ?? "szt.",
+                Quantity = double.TryParse(node.Element("Quantity")?.Value, out var q) ? q : 1,
+                Purchased = bool.TryParse(node.Element("Purchased")?.Value, out var p) ? p : false,
+                Category = node.Element("Category")?.Value ?? string.Empty
             });
 
-            // Najpierw niekupione, potem kupione
-            return products.OrderBy(p => p.Purchased).ThenByDescending(p => p.Id);
+            return products;
         }
     }
 }

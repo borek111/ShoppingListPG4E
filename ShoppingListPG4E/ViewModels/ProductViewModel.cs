@@ -1,18 +1,10 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Microsoft.Maui;
-using Microsoft.Maui.ApplicationModel;
-using Microsoft.Maui.Controls;
-using Microsoft.Maui.Devices;
-using ShoppingListPG4E.Models;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using System.Xml.Linq;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+
+using ShoppingListPG4E.Models;
 
 namespace ShoppingListPG4E.ViewModels
 {
@@ -21,17 +13,29 @@ namespace ShoppingListPG4E.ViewModels
         private Product _product;
 
         public ObservableCollection<string> Units { get; private set; }
+        public ObservableCollection<string> Categories { get; private set; }
 
         private string UnitsFile => Path.Combine(FileSystem.AppDataDirectory, "units.xml");
+        private string CategoriesFile => Path.Combine(FileSystem.AppDataDirectory, "categories.xml");
 
-        // flaga żeby uniknąć re-entrancy przy programowym ustawianiu Unit
+        private bool _suppressCategoryPrompt = false;
         private bool _suppressUnitPrompt = false;
+
+        // Callbacks
+        public Action<ProductViewModel>? PurchasedChangedCallback { get; set; }
+        public Action<ProductViewModel>? DeletedCallback { get; set; }
 
         public ProductViewModel()
         {
             _product = new Product();
             LoadUnits();
-            if (Units.Count > 0) Unit = Units[0];
+            LoadCategories();
+
+            if (Units != null && Units.Count > 0 && string.IsNullOrEmpty(_product.Unit))
+                _product.Unit = Units[0];
+            if (Categories != null && Categories.Count > 0 && string.IsNullOrEmpty(_product.Category))
+                _product.Category = Categories[0];
+
             InitializeCommands();
         }
 
@@ -39,11 +43,16 @@ namespace ShoppingListPG4E.ViewModels
         {
             _product = product;
             LoadUnits();
-            if (string.IsNullOrEmpty(_product.Unit) && Units.Count > 0) Unit = Units[0];
+            LoadCategories();
+
+            if (string.IsNullOrEmpty(_product.Unit) && Units != null && Units.Count > 0)
+                _product.Unit = Units[0];
+            if (string.IsNullOrEmpty(_product.Category) && Categories != null && Categories.Count > 0)
+                _product.Category = Categories[0];
+
             InitializeCommands();
         }
 
-        // --- podstawowe właściwości ---
         public string Name
         {
             get => _product.Name;
@@ -76,12 +85,39 @@ namespace ShoppingListPG4E.ViewModels
                 {
                     _product.Unit = value;
                     OnPropertyChanged();
-                    PromptForCustomUnitAsync(_product.Unit);
+                    _ = PromptForCustomUnitAsync(_product.Unit);
                     return;
                 }
 
-                // normalne ustawienie
                 _product.Unit = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string Category
+        {
+            get => _product.Category;
+            set
+            {
+                if (_product.Category == value) return;
+
+                if (_suppressCategoryPrompt)
+                {
+                    _product.Category = value;
+                    _suppressCategoryPrompt = false;
+                    OnPropertyChanged();
+                    return;
+                }
+
+                if (value == "Inne...")
+                {
+                    _product.Category = value;
+                    OnPropertyChanged();
+                    _ = PromptForCustomCategoryAsync(_product.Category);
+                    return;
+                }
+
+                _product.Category = value;
                 OnPropertyChanged();
             }
         }
@@ -110,7 +146,7 @@ namespace ShoppingListPG4E.ViewModels
                     _product.Purchased = value;
                     _product.Save();
                     OnPropertyChanged();
-                    Shell.Current.GoToAsync($"..?toggled={Identifier}");
+                    PurchasedChangedCallback?.Invoke(this);
                 }
             }
         }
@@ -128,7 +164,7 @@ namespace ShoppingListPG4E.ViewModels
         {
             IncreaseCommand = new RelayCommand(Increase);
             DecreaseCommand = new RelayCommand(Decrease);
-            DeleteCommand = new RelayCommand(Delete);
+            DeleteCommand = new RelayCommand(Delete); 
             TogglePurchasedCommand = new RelayCommand(TogglePurchased);
             AddCommand = new RelayCommand(AddProduct);
             CancelCommand = new RelayCommand(CancelProduct);
@@ -151,7 +187,7 @@ namespace ShoppingListPG4E.ViewModels
         private void Delete()
         {
             _product.Delete();
-            Shell.Current.GoToAsync($"..?deleted={_product.Id}");
+            DeletedCallback.Invoke(this);
         }
 
         private void TogglePurchased()
@@ -161,6 +197,9 @@ namespace ShoppingListPG4E.ViewModels
 
         private void AddProduct()
         {
+            if (string.IsNullOrWhiteSpace(_product.Category) && Categories != null && Categories.Count > 0)
+                _product.Category = Categories[0];
+
             _product.Save();
             Shell.Current.GoToAsync($"..?saved={_product.Id}");
         }
@@ -171,27 +210,74 @@ namespace ShoppingListPG4E.ViewModels
             Shell.Current.GoToAsync($"..?deleted={_product.Id}");
         }
 
-        //XML: load/save Units 
-        private void LoadUnits()
+        private void LoadCategories()
         {
-           
-            if (File.Exists(UnitsFile))
+            try
             {
-                var doc = XDocument.Load(UnitsFile);
-                Units = new ObservableCollection<string>(
-                    doc.Root.Elements("Unit").Select(u => u.Value)
-                );
+                if (File.Exists(CategoriesFile))
+                {
+                    var doc = XDocument.Load(CategoriesFile);
+                    var list = doc.Root.Elements("Category").Select(x => x.Value).ToList();
+                    if (!list.Contains("Inne...")) list.Add("Inne...");
+                    Categories = new ObservableCollection<string>(list);
+                }
+                else
+                {
+                    var defaults = new List<string> { "Nabiał", "Warzywa", "Owoce", "Elektronika", "AGD", "Inne..." };
+                    Categories = new ObservableCollection<string>(defaults);
+                    SaveCategories();
+                }
             }
-            else
+            catch
             {
-                Units = new ObservableCollection<string> { "szt.", "kg", "l", "g", "opak.", "ml" };
-                SaveUnits();
+                Categories = new ObservableCollection<string> { "Nabiał", "Warzywa", "Owoce", "Elektronika", "AGD", "Inne..." };
             }
 
-            // Dodaj "Inne..." na końcu, jeśli jeszcze nie ma
-            if (!Units.Contains("Inne..."))
-                Units.Add("Inne...");
-           
+            OnPropertyChanged(nameof(Categories));
+        }
+
+        private void SaveCategories()
+        {
+            var doc = new XDocument(new XElement("Categories", Categories.Select(c => new XElement("Category", c))));
+            doc.Save(CategoriesFile);
+        }
+
+        private void AddCategoryToListAndSave(string category)
+        {
+            if (string.IsNullOrWhiteSpace(category)) return;
+            if (Categories.Any(u => string.Equals(u, category, StringComparison.OrdinalIgnoreCase))) return;
+
+            int idx = Categories.IndexOf("Inne...");
+            if (idx >= 0)
+                Categories.Insert(idx, category);
+            else
+                Categories.Add(category);
+
+            SaveCategories();
+            OnPropertyChanged(nameof(Categories));
+        }
+
+        private void LoadUnits()
+        {
+            try
+            {
+                if (File.Exists(UnitsFile))
+                {
+                    var doc = XDocument.Load(UnitsFile);
+                    var list = doc.Root.Elements("Unit").Select(u => u.Value).ToList();
+                    if (!list.Contains("Inne...")) list.Add("Inne...");
+                    Units = new ObservableCollection<string>(list);
+                }
+                else
+                {
+                    Units = new ObservableCollection<string> { "szt.", "kg", "l", "g", "opak.", "ml", "Inne..." };
+                    SaveUnits();
+                }
+            }
+            catch
+            {
+                Units = new ObservableCollection<string> { "szt.", "kg", "l", "g", "opak.", "ml", "Inne..." };
+            }
 
             OnPropertyChanged(nameof(Units));
         }
@@ -199,7 +285,7 @@ namespace ShoppingListPG4E.ViewModels
         private void SaveUnits()
         {
             var doc = new XDocument(new XElement("Units", Units.Select(u => new XElement("Unit", u))));
-            doc.Save(UnitsFile); 
+            doc.Save(UnitsFile);
         }
 
         private void AddUnitToListAndSave(string unit)
@@ -214,12 +300,9 @@ namespace ShoppingListPG4E.ViewModels
                 Units.Add(unit);
 
             SaveUnits();
+            OnPropertyChanged(nameof(Units));
         }
 
-
-
-
-        // --- prompt dla "Inne..." ---
         private async Task PromptForCustomUnitAsync(string previousValue)
         {
             await MainThread.InvokeOnMainThreadAsync(async () =>
@@ -235,7 +318,6 @@ namespace ShoppingListPG4E.ViewModels
 
                 if (!string.IsNullOrWhiteSpace(result))
                 {
-                    // dodaj
                     AddUnitToListAndSave(result.Trim());
                     _suppressUnitPrompt = true;
                     _product.Unit = result.Trim();
@@ -243,20 +325,48 @@ namespace ShoppingListPG4E.ViewModels
                 }
                 else
                 {
-                    // anulowano, przywróć poprzednią
                     _suppressUnitPrompt = true;
-                    _product.Unit = previousValue;
+                    _product.Unit = previousValue ?? Units.FirstOrDefault();
                     OnPropertyChanged(nameof(Unit));
                 }
             });
         }
 
-        // reload produktu z xml
+        private async Task PromptForCustomCategoryAsync(string previousValue)
+        {
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                string result = await Shell.Current.DisplayPromptAsync(
+                    "Nowa kategoria",
+                    "Wpisz nazwę kategorii (np. Nabiał):",
+                    "Zapisz",
+                    "Anuluj",
+                    placeholder: "np. Nabiał",
+                    maxLength: -1,
+                    keyboard: Keyboard.Text);
+
+                if (!string.IsNullOrWhiteSpace(result))
+                {
+                    AddCategoryToListAndSave(result.Trim());
+                    _suppressCategoryPrompt = true;
+                    _product.Category = result.Trim();
+                    OnPropertyChanged(nameof(Category));
+                }
+                else
+                {
+                    _suppressCategoryPrompt = true;
+                    _product.Category = previousValue ?? Categories.FirstOrDefault();
+                    OnPropertyChanged(nameof(Category));
+                }
+            });
+        }
+
         public void Reload()
         {
             _product = Product.Load(_product.Id);
             OnPropertyChanged(nameof(Name));
             OnPropertyChanged(nameof(Unit));
+            OnPropertyChanged(nameof(Category));
             OnPropertyChanged(nameof(Quantity));
             OnPropertyChanged(nameof(Purchased));
         }

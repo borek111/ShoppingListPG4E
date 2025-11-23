@@ -5,6 +5,14 @@ public partial class AllProductsPage : ContentPage
     public AllProductsPage()
     {
         InitializeComponent();
-        BindingContext = new ShoppingListPG4E.ViewModels.ProductsViewModel();
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        if (BindingContext is ShoppingListPG4E.ViewModels.AllProductsViewModel vm)
+        {
+            vm.LoadCategoriesAndProducts();
+        }
     }
 }

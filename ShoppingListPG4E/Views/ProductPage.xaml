@@ -11,7 +11,13 @@
     </ContentPage.BindingContext>
 
     <VerticalStackLayout Spacing="10" Margin="10">
+
         <Entry Placeholder="Nazwa produktu" Text="{Binding Name, Mode=TwoWay}" />
+
+        <Label Text="Kategoria:" />
+        <Picker Title="Wybierz kategorię"
+                ItemsSource="{Binding Categories}"
+                SelectedItem="{Binding Category, Mode=TwoWay}" />
 
         <Label Text="Jednostka:" />
         <Picker Title="Wybierz jednostkę"
