@@ -27,55 +27,105 @@ namespace ShoppingListPG4E.Models
             Category = string.Empty;
         }
 
+        public static XDocument LoadOrCreateDocument()
+        {
+            if (File.Exists(XmlPath))
+            {
+                return XDocument.Load(XmlPath);
+            }
+
+            var doc = new XDocument(
+                new XElement("ShoppingList",
+                    new XElement("Categories",
+                        new XElement("Category", "Nabiał"),
+                        new XElement("Category", "Warzywa"),
+                        new XElement("Category", "Owoce"),
+                        new XElement("Category", "Elektronika"),
+                        new XElement("Category", "AGD"),
+                        new XElement("Category", "Inne...")
+                    ),
+                    new XElement("Units",
+                        new XElement("Unit", "szt."),
+                        new XElement("Unit", "kg"),
+                        new XElement("Unit", "l"),
+                        new XElement("Unit", "g"),
+                        new XElement("Unit", "opak."),
+                        new XElement("Unit", "ml"),
+                        new XElement("Unit", "Inne...")
+                    ),
+                    new XElement("Products")
+                )
+            );
+            doc.Save(XmlPath);
+            return doc;
+        }
+
+        public static XElement EnsureSection(XDocument doc, string sectionName)
+        {
+            var root = doc.Root!;
+            var section = root.Element(sectionName);
+            if (section == null)
+            {
+                section = new XElement(sectionName);
+                root.Add(section);
+            }
+            return section;
+        }
+
         public void Save()
         {
-            XElement root;
-            if (File.Exists(XmlPath))
-                root = XElement.Load(XmlPath);
-            else
-                root = new XElement("Products");
+            var doc = LoadOrCreateDocument();
+            var productsRoot = EnsureSection(doc, "Products");
 
-            var existing = root.Elements("Product").FirstOrDefault(x => x.Attribute("Id")?.Value == Id);
+            var existing = productsRoot.Elements("Product").FirstOrDefault(x => x.Attribute("Id")?.Value == Id);
             if (existing != null)
             {
-                existing.Element("Name").Value = Name;
-                existing.Element("Unit").Value = Unit;
-                existing.Element("Quantity").Value = Quantity.ToString();
-                existing.Element("Purchased").Value = Purchased.ToString();
-                existing.Element("Category").Value = Category;
+                existing.Element("Name")!.Value = Name;
+                existing.Element("Unit")!.Value = Unit;
+                existing.Element("Quantity")!.Value = Quantity.ToString();
+                existing.Element("Purchased")!.Value = Purchased.ToString();
+                existing.Element("Category")!.Value = Category;
             }
             else
             {
-                root.Add(new XElement("Product",
-                            new XAttribute("Id", Id),
-                            new XElement("Name", Name),
-                            new XElement("Unit", Unit),
-                            new XElement("Quantity", Quantity),
-                            new XElement("Purchased", Purchased),
-                            new XElement("Category", Category)
-                        ));
+                productsRoot.Add(new XElement("Product",
+                    new XAttribute("Id", Id),
+                    new XElement("Name", Name),
+                    new XElement("Unit", Unit),
+                    new XElement("Quantity", Quantity),
+                    new XElement("Purchased", Purchased),
+                    new XElement("Category", Category)
+                ));
             }
 
-            root.Save(XmlPath);
+            doc.Save(XmlPath);
         }
 
         public void Delete()
         {
             if (!File.Exists(XmlPath)) return;
 
-            XElement root = XElement.Load(XmlPath);
-            var node = root.Elements("Product").FirstOrDefault(x => x.Attribute("Id")?.Value == Id);
+            var doc = XDocument.Load(XmlPath);
+            var productsRoot = EnsureSection(doc, "Products");
+
+            var node = productsRoot.Elements("Product").FirstOrDefault(x => x.Attribute("Id")?.Value == Id);
             if (node != null)
             {
                 node.Remove();
-                root.Save(XmlPath);
+                doc.Save(XmlPath);
             }
         }
 
         public static Product Load(string id)
         {
-            XElement root = XElement.Load(XmlPath);
-            var node = root.Elements("Product").FirstOrDefault(x => x.Attribute("Id").Value == id);
+            var doc = LoadOrCreateDocument();
+            var productsRoot = EnsureSection(doc, "Products");
+
+            var node = productsRoot.Elements("Product").FirstOrDefault(x => x.Attribute("Id")?.Value == id);
+            if (node == null)
+            {
+                return new Product { Id = id };
+            }
 
             return new Product
             {
@@ -83,23 +133,28 @@ namespace ShoppingListPG4E.Models
                 Name = node.Element("Name")?.Value ?? string.Empty,
                 Unit = node.Element("Unit")?.Value ?? "szt.",
                 Quantity = double.TryParse(node.Element("Quantity")?.Value, out var q) ? q : 1,
-                Purchased = bool.TryParse(node.Element("Purchased")?.Value, out var p) ? p : false,
+                Purchased = bool.TryParse(node.Element("Purchased")?.Value, out var p) && p,
                 Category = node.Element("Category")?.Value ?? string.Empty
             };
         }
 
         public static IEnumerable<Product> LoadAll()
         {
-            if (!File.Exists(XmlPath)) return new List<Product>();
-
-            XElement root = XElement.Load(XmlPath);
-            var products = root.Elements("Product").Select(node => new Product
+            if (!File.Exists(XmlPath))
             {
-                Id = node.Attribute("Id").Value,
+                return new List<Product>();
+            }
+
+            var doc = XDocument.Load(XmlPath);
+            var productsRoot = EnsureSection(doc, "Products");
+
+            var products = productsRoot.Elements("Product").Select(node => new Product
+            {
+                Id = node.Attribute("Id")?.Value ?? Guid.NewGuid().ToString(),
                 Name = node.Element("Name")?.Value ?? string.Empty,
                 Unit = node.Element("Unit")?.Value ?? "szt.",
                 Quantity = double.TryParse(node.Element("Quantity")?.Value, out var q) ? q : 1,
-                Purchased = bool.TryParse(node.Element("Purchased")?.Value, out var p) ? p : false,
+                Purchased = bool.TryParse(node.Element("Purchased")?.Value, out var p) && p,
                 Category = node.Element("Category")?.Value ?? string.Empty
             });
 

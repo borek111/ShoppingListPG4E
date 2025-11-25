@@ -8,8 +8,12 @@
     Shell.FlyoutBehavior="Disabled"
     Title="ShoppingListPG4E">
 
-    <ShellContent Title="Shopping List" 
+    <TabBar>
+        <ShellContent Title="Lista Zakupów" 
                   ContentTemplate="{DataTemplate views:AllProductsPage}" />
+        <ShellContent Title="Import/Export List" 
+                  ContentTemplate="{DataTemplate views:ImportAndExportPage}" />
+    </TabBar>
 
 
 </Shell>

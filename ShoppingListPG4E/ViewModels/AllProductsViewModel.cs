@@ -19,8 +19,6 @@ namespace ShoppingListPG4E.ViewModels
 
         private readonly Dictionary<string, CategoryViewModel> _categoryViewModels = new(StringComparer.OrdinalIgnoreCase);
 
-        private string CategoriesFile => Path.Combine(FileSystem.AppDataDirectory, "categories.xml");
-
         public AllProductsViewModel()
         {
             NewCommand = new RelayCommand(OpenAddProductPage);
@@ -32,50 +30,93 @@ namespace ShoppingListPG4E.ViewModels
             Shell.Current.GoToAsync(nameof(ShoppingListPG4E.Views.ProductPage));
         }
 
+        private List<string> LoadCategoriesFromXml()
+        {
+            try
+            {
+                var doc = Models.Product.LoadOrCreateDocument();
+                var categoriesRoot = Models.Product.EnsureSection(doc, "Categories");
+                var list = categoriesRoot.Elements("Category").Select(x => x.Value).ToList();
+                if (!list.Contains("Inne...")) list.Add("Inne...");
+                return list;
+            }
+            catch
+            {
+                return new List<string> { "Nabiał", "Warzywa", "Owoce", "Elektronika", "AGD", "Inne..." };
+            }
+        }
+
         public void LoadCategoriesAndProducts()
+        {
+            ResetCollections();
+
+            var definedCategories = LoadCategoriesFromXml();
+            var products = LoadAllProducts();
+            var categoryMap = BuildCategoryMap(definedCategories, products);
+            var displayCategories = ComputeDisplayCategories(categoryMap.Keys, definedCategories);
+
+            BuildAndAttachCategoryViewModels(displayCategories, categoryMap);
+        }
+
+        private void ResetCollections()
         {
             Categories.Clear();
             _categoryViewModels.Clear();
-            var definedCategories = LoadCategoriesFromXml();
+        }
 
-            var products = Models.Product.LoadAll()
-                             .Select(p => new ProductViewModel(p))
-                             .ToList();
+        private List<ProductViewModel> LoadAllProducts()
+        {
+            return Models.Product.LoadAll()
+                .Select(p => new ProductViewModel(p))
+                .ToList();
+        }
 
+        private Dictionary<string, List<ProductViewModel>> BuildCategoryMap(List<string> definedCategories, List<ProductViewModel> products)
+        {
             var categoryMap = new Dictionary<string, List<ProductViewModel>>(StringComparer.OrdinalIgnoreCase);
 
             // inicjalizuj wpisy dla zdefiniowanych kategorii
             foreach (var c in definedCategories)
+            {
                 if (!categoryMap.ContainsKey(c))
                     categoryMap[c] = new List<ProductViewModel>();
+            }
 
             // rozdziel produkty do słownika, dodając brakujące kategorie
             foreach (var pv in products)
             {
                 var catName = string.IsNullOrWhiteSpace(pv.Category) ? "Bez kategorii" : pv.Category;
+
                 if (!categoryMap.ContainsKey(catName))
                 {
                     categoryMap[catName] = new List<ProductViewModel>();
                     definedCategories.Add(catName);
                 }
+
                 categoryMap[catName].Add(pv);
             }
 
-            // wyswietl bez "Inne..."
-            var displayCategories = categoryMap.Keys
+            return categoryMap;
+        }
+
+        private List<string> ComputeDisplayCategories(IEnumerable<string> categoriesInMap, List<string> definedCategories)
+        {
+            return categoriesInMap
                 .Where(c => !string.Equals(c, "Inne...", StringComparison.OrdinalIgnoreCase))
                 .OrderBy(c => definedCategories.FindIndex(dc => dc.Equals(c, StringComparison.OrdinalIgnoreCase)))
                 .ToList();
+        }
 
-            // buduj CategoryViewModel
+        private void BuildAndAttachCategoryViewModels(List<string> displayCategories, Dictionary<string, List<ProductViewModel>> categoryMap)
+        {
             foreach (var catName in displayCategories)
             {
-                var list = categoryMap[catName]
+                var orderedProducts = categoryMap[catName]
                     .OrderBy(p => p.Purchased)
                     .ThenBy(p => p.Name)
                     .ToList();
 
-                var catVm = new CategoryViewModel(catName, list);
+                var catVm = new CategoryViewModel(catName, orderedProducts);
 
                 foreach (var pv in catVm.Products)
                 {
@@ -96,34 +137,6 @@ namespace ShoppingListPG4E.ViewModels
                 cat.Products.Remove(deleted);
                 cat.RefreshOrder();
             }
-        }
-
-        private List<string> LoadCategoriesFromXml()
-        {
-            try
-            {
-                if (!File.Exists(CategoriesFile))
-                {
-                    var defaults = new List<string> { "Nabiał", "Warzywa", "Owoce", "Elektronika", "AGD", "Inne..." };
-                    SaveCategoriesToXml(defaults);
-                    return defaults;
-                }
-
-                var doc = XDocument.Load(CategoriesFile);
-                var list = doc.Root!.Elements("Category").Select(x => x.Value).ToList();
-                if (!list.Contains("Inne...")) list.Add("Inne...");
-                return list;
-            }
-            catch
-            {
-                return new List<string> { "Nabiał", "Warzywa", "Owoce", "Elektronika", "AGD", "Inne..." };
-            }
-        }
-
-        private void SaveCategoriesToXml(IEnumerable<string> categories)
-        {
-            var doc = new XDocument(new XElement("Categories", categories.Select(c => new XElement("Category", c))));
-            doc.Save(CategoriesFile);
         }
 
         public void RefreshAllCategoriesOrdering()
