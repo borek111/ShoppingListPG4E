@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:ShoppingListPG4E.ViewModels"
              xmlns:conv="clr-namespace:ShoppingListPG4E.Converters"
+             xmlns:views="clr-namespace:ShoppingListPG4E.Views"
              x:Class="ShoppingListPG4E.Views.AllProductsPage"
              x:DataType="vm:AllProductsViewModel"
              Title="Lista zakupów">
@@ -27,70 +28,8 @@
         </CollectionView.ItemsLayout>
 
         <CollectionView.ItemTemplate>
-            <DataTemplate x:DataType="vm:CategoryViewModel">    
-                <Frame HasShadow="True" CornerRadius="8" Padding="10" Margin="0,4">
-                    <VerticalStackLayout Spacing="6">
-
-                        <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
-                            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                                <Label Text="{Binding Name}" FontSize="18" />
-                                <Label Text="(" />
-                                <Label Text="{Binding Products.Count}" />
-                                <Label Text=")" />
-                            </HorizontalStackLayout>
-
-                            <Button Grid.Column="1"
-                                    Command="{Binding ToggleExpandCommand}"
-                                    WidthRequest="40" HeightRequest="40">
-                                <Button.Triggers>
-                                    <DataTrigger TargetType="Button" Binding="{Binding IsExpanded}" Value="True">
-                                        <Setter Property="Text" Value="▾" />
-                                    </DataTrigger>
-                                    <DataTrigger TargetType="Button" Binding="{Binding IsExpanded}" Value="False">
-                                        <Setter Property="Text" Value="▸" />
-                                    </DataTrigger>
-                                </Button.Triggers>
-                            </Button>
-                        </Grid>
-
-                        <CollectionView ItemsSource="{Binding Products}"
-                                        IsVisible="{Binding IsExpanded}"
-                                        SelectionMode="None"
-                                        Margin="0,6,0,0">
-                            <CollectionView.ItemsLayout>
-                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="6"/>
-                            </CollectionView.ItemsLayout>
-
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="vm:ProductViewModel">
-                                    <Frame HasShadow="False"
-                                           CornerRadius="6"
-                                           Padding="8"
-                                           BackgroundColor="Transparent"
-                                           Opacity="{Binding Purchased, Converter={StaticResource BoolToOpacityConverter}}">
-                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                            <VerticalStackLayout>
-                                                <Label Text="{Binding Name}" FontSize="16" />
-                                                <HorizontalStackLayout Spacing="8">
-                                                    <Label Text="{Binding Quantity, StringFormat='{}{0:0}'}" />
-                                                    <Label Text="{Binding Unit}" />
-                                                    <Label Text="-" />
-                                                    <Label Text="{Binding Category}" />
-                                                </HorizontalStackLayout>
-                                            </VerticalStackLayout>
-
-                                            <HorizontalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
-                                                <CheckBox IsChecked="{Binding Purchased, Mode=TwoWay}" />
-                                                <Button Text="Del" Command="{Binding DeleteCommand}" WidthRequest="64"/>
-                                            </HorizontalStackLayout>
-                                        </Grid>
-                                    </Frame>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
-
-                    </VerticalStackLayout>
-                </Frame>
+            <DataTemplate x:DataType="vm:CategoryViewModel">
+                <views:CategoryView />
             </DataTemplate>
         </CollectionView.ItemTemplate>
     </CollectionView>

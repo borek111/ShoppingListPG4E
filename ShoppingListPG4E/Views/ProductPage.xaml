@@ -10,31 +10,33 @@
         <ViewModels:ProductViewModel/>
     </ContentPage.BindingContext>
 
-    <VerticalStackLayout Spacing="10" Margin="10">
+    <ScrollView Orientation="Vertical" VerticalOptions="FillAndExpand">
+        <VerticalStackLayout Spacing="10" Margin="10">
 
-        <Entry Placeholder="Nazwa produktu" Text="{Binding Name, Mode=TwoWay}" />
+            <Entry Placeholder="Nazwa produktu" Text="{Binding Name, Mode=TwoWay}" />
 
-        <Label Text="Kategoria:" />
-        <Picker Title="Wybierz kategorię"
-                ItemsSource="{Binding Categories}"
-                SelectedItem="{Binding Category, Mode=TwoWay}" />
+            <Label Text="Kategoria:" />
+            <Picker Title="Wybierz kategorię"
+                    ItemsSource="{Binding Categories}"
+                    SelectedItem="{Binding Category, Mode=TwoWay}" />
 
-        <Label Text="Jednostka:" />
-        <Picker Title="Wybierz jednostkę"
-                ItemsSource="{Binding Units}"
-                SelectedItem="{Binding Unit, Mode=TwoWay}" />
+            <Label Text="Jednostka:" />
+            <Picker Title="Wybierz jednostkę"
+                    ItemsSource="{Binding Units}"
+                    SelectedItem="{Binding Unit, Mode=TwoWay}" />
 
-        <!-- Ilość z przyciskami + i - -->
-        <Grid ColumnDefinitions="50,*,50" ColumnSpacing="8">
-            <Button Grid.Column="0" Text="-" Command="{Binding DecreaseCommand}" HeightRequest="40" />
-            <Entry Grid.Column="1" Text="{Binding Quantity, Mode=TwoWay}" Keyboard="Numeric" HorizontalTextAlignment="Center" HeightRequest="40" />
-            <Button Grid.Column="2" Text="+" Command="{Binding IncreaseCommand}" HeightRequest="40" />
-        </Grid>
+            <!-- Ilość z przyciskami + i - -->
+            <Grid ColumnDefinitions="50,*,50" ColumnSpacing="8">
+                <Button Grid.Column="0" Text="-" Command="{Binding DecreaseCommand}" HeightRequest="40" />
+                <Entry Grid.Column="1" Text="{Binding Quantity, Mode=TwoWay}" Keyboard="Numeric" HorizontalTextAlignment="Center" HeightRequest="40" />
+                <Button Grid.Column="2" Text="+" Command="{Binding IncreaseCommand}" HeightRequest="40" />
+            </Grid>
 
-        <!-- Add / Cancel -->
-        <HorizontalStackLayout Spacing="10" Margin="0,10,0,0" HorizontalOptions="Fill">
-            <Button Text="Add" Command="{Binding AddCommand}" HorizontalOptions="FillAndExpand"/>
-            <Button Text="Cancel" Command="{Binding CancelCommand}" HorizontalOptions="FillAndExpand"/>
-        </HorizontalStackLayout>
-    </VerticalStackLayout>
+            <!-- Add / Cancel -->
+            <HorizontalStackLayout Spacing="10" Margin="0,10,0,0" HorizontalOptions="Fill">
+                <Button Text="Add" Command="{Binding AddCommand}" HorizontalOptions="FillAndExpand"/>
+                <Button Text="Cancel" Command="{Binding CancelCommand}" HorizontalOptions="FillAndExpand"/>
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
