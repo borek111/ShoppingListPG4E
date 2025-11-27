@@ -4,7 +4,7 @@
              x:Class="ShoppingListPG4E.Views.ImportAndExportPage"
              Title="Import / Export">
     <VerticalStackLayout Padding="24" Spacing="16">
-        <Label Text="Zarządzanie plikiem ShoppingList.xml" FontAttributes="Bold" />
+        <Label Text="Zarządzanie importem i exportem" FontAttributes="Bold" />
         <Button Text="Exportuj" Command="{Binding ExportCommand}" />
         <Button Text="Importuj" Command="{Binding ImportCommand}" />
         <Label Text="{Binding Status}" TextColor="Gray" LineBreakMode="WordWrap" />

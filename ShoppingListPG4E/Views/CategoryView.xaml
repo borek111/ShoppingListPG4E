@@ -64,7 +64,8 @@
                                 </VerticalStackLayout>
 
                                 <HorizontalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
-                                    <CheckBox IsChecked="{Binding Purchased, Mode=TwoWay}" />
+                                    <Label Text="Kupione:" VerticalTextAlignment="Center" Margin="0,0,4,0" />
+									<CheckBox IsChecked="{Binding Purchased, Mode=TwoWay}" />
                                     <Button Text="Del" Command="{Binding DeleteCommand}" WidthRequest="64"/>
                                 </HorizontalStackLayout>
                             </Grid>
