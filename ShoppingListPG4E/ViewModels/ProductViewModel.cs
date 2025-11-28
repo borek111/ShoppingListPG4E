@@ -56,10 +56,12 @@ namespace ShoppingListPG4E.ViewModels
             get => _product.Name;
             set
             {
-                if (_product.Name != value)
+                var cleaned = value?.Trim() ?? string.Empty;
+                if (_product.Name != cleaned)
                 {
-                    _product.Name = value;
+                    _product.Name = cleaned;
                     OnPropertyChanged();
+                    (AddCommand as RelayCommand)?.NotifyCanExecuteChanged();
                 }
             }
         }
@@ -149,7 +151,7 @@ namespace ShoppingListPG4E.ViewModels
             }
         }
 
-        public bool Optional 
+        public bool Optional
         {
             get => _product.Optional;
             set
@@ -176,11 +178,13 @@ namespace ShoppingListPG4E.ViewModels
         {
             IncreaseCommand = new RelayCommand(Increase);
             DecreaseCommand = new RelayCommand(Decrease);
-            DeleteCommand = new RelayCommand(Delete); 
+            DeleteCommand = new RelayCommand(Delete);
             TogglePurchasedCommand = new RelayCommand(TogglePurchased);
-            AddCommand = new RelayCommand(AddProduct);
+            AddCommand = new RelayCommand(AddProduct, CanAddProduct);
             CancelCommand = new RelayCommand(CancelProduct);
         }
+
+        private bool CanAddProduct() => !string.IsNullOrWhiteSpace(_product.Name);
 
         // Command Methods
         private void Increase()
@@ -200,7 +204,7 @@ namespace ShoppingListPG4E.ViewModels
         private void Delete()
         {
             _product.Delete();
-            DeletedCallback.Invoke(this);
+            DeletedCallback?.Invoke(this);
         }
 
         private void TogglePurchased()
@@ -210,6 +214,9 @@ namespace ShoppingListPG4E.ViewModels
 
         private void AddProduct()
         {
+            if (string.IsNullOrWhiteSpace(_product.Name))
+                return;
+
             if (string.IsNullOrWhiteSpace(_product.Category) && Categories != null && Categories.Count > 0)
                 _product.Category = Categories[0];
 
@@ -223,7 +230,6 @@ namespace ShoppingListPG4E.ViewModels
             Shell.Current.GoToAsync($"..?deleted={_product.Id}");
         }
 
-        // Load and Save 
         private void LoadCategories()
         {
             try
