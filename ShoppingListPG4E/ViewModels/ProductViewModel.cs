@@ -149,6 +149,19 @@ namespace ShoppingListPG4E.ViewModels
             }
         }
 
+        public bool Optional 
+        {
+            get => _product.Optional;
+            set
+            {
+                if (_product.Optional != value)
+                {
+                    _product.Optional = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public string Identifier => _product.Id;
 
         // Commands

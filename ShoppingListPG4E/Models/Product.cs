@@ -14,6 +14,7 @@ namespace ShoppingListPG4E.Models
         public double Quantity { get; set; }
         public bool Purchased { get; set; } 
         public string Category { get; set; } 
+        public bool Optional { get; set; }
 
         private static string XmlPath => Path.Combine(FileSystem.AppDataDirectory, "ShoppingList.xml");
 
@@ -25,6 +26,7 @@ namespace ShoppingListPG4E.Models
             Quantity = 1;
             Purchased = false;
             Category = string.Empty;
+            Optional = false;
         }
 
         public static XDocument LoadOrCreateDocument()
@@ -85,6 +87,8 @@ namespace ShoppingListPG4E.Models
                 existing.Element("Quantity")!.Value = Quantity.ToString();
                 existing.Element("Purchased")!.Value = Purchased.ToString();
                 existing.Element("Category")!.Value = Category;
+                existing.Element("Optional")!.Value = Optional.ToString();
+   
             }
             else
             {
@@ -94,7 +98,8 @@ namespace ShoppingListPG4E.Models
                     new XElement("Unit", Unit),
                     new XElement("Quantity", Quantity),
                     new XElement("Purchased", Purchased),
-                    new XElement("Category", Category)
+                    new XElement("Category", Category),
+                    new XElement("Optional", Optional)
                 ));
             }
 
@@ -134,7 +139,8 @@ namespace ShoppingListPG4E.Models
                 Unit = node.Element("Unit")?.Value ?? "szt.",
                 Quantity = double.TryParse(node.Element("Quantity")?.Value, out var q) ? q : 1,
                 Purchased = bool.TryParse(node.Element("Purchased")?.Value, out var p) && p,
-                Category = node.Element("Category")?.Value ?? string.Empty
+                Category = node.Element("Category")?.Value ?? string.Empty,
+                Optional = bool.TryParse(node.Element("Optional")?.Value, out var o) && o 
             };
         }
 
@@ -155,7 +161,8 @@ namespace ShoppingListPG4E.Models
                 Unit = node.Element("Unit")?.Value ?? "szt.",
                 Quantity = double.TryParse(node.Element("Quantity")?.Value, out var q) ? q : 1,
                 Purchased = bool.TryParse(node.Element("Purchased")?.Value, out var p) && p,
-                Category = node.Element("Category")?.Value ?? string.Empty
+                Category = node.Element("Category")?.Value ?? string.Empty,
+                Optional = bool.TryParse(node.Element("Optional")?.Value, out var o) && o 
             });
 
             return products;
