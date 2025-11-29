@@ -7,6 +7,5 @@ public partial class ImportAndExportPage : ContentPage
     public ImportAndExportPage()
     {
         InitializeComponent();
-        BindingContext = new ImportExportViewModel();
     }
 }

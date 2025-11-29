@@ -15,6 +15,7 @@ namespace ShoppingListPG4E.Models
         public bool Purchased { get; set; } 
         public string Category { get; set; } 
         public bool Optional { get; set; }
+        public string Store { get; set; } 
 
         private static string XmlPath => Path.Combine(FileSystem.AppDataDirectory, "ShoppingList.xml");
 
@@ -27,6 +28,7 @@ namespace ShoppingListPG4E.Models
             Purchased = false;
             Category = string.Empty;
             Optional = false;
+            Store = string.Empty;
         }
 
         public static XDocument LoadOrCreateDocument()
@@ -54,6 +56,14 @@ namespace ShoppingListPG4E.Models
                         new XElement("Unit", "opak."),
                         new XElement("Unit", "ml"),
                         new XElement("Unit", "Inne...")
+                    ),
+                    
+                    new XElement("Stores",
+                        new XElement("Store", "Biedronka"),
+                        new XElement("Store", "Lidl"),
+                        new XElement("Store", "Selgros"),
+                        new XElement("Store", "Auchan"),
+                        new XElement("Store", "Inne...")
                     ),
                     new XElement("Products")
                 )
@@ -88,7 +98,7 @@ namespace ShoppingListPG4E.Models
                 existing.Element("Purchased")!.Value = Purchased.ToString();
                 existing.Element("Category")!.Value = Category;
                 existing.Element("Optional")!.Value = Optional.ToString();
-   
+                existing.Element("Store")!.Value = Store;
             }
             else
             {
@@ -99,7 +109,8 @@ namespace ShoppingListPG4E.Models
                     new XElement("Quantity", Quantity),
                     new XElement("Purchased", Purchased),
                     new XElement("Category", Category),
-                    new XElement("Optional", Optional)
+                    new XElement("Optional", Optional),
+                    new XElement("Store", Store ?? string.Empty) 
                 ));
             }
 
@@ -140,7 +151,8 @@ namespace ShoppingListPG4E.Models
                 Quantity = double.TryParse(node.Element("Quantity")?.Value, out var q) ? q : 1,
                 Purchased = bool.TryParse(node.Element("Purchased")?.Value, out var p) && p,
                 Category = node.Element("Category")?.Value ?? string.Empty,
-                Optional = bool.TryParse(node.Element("Optional")?.Value, out var o) && o 
+                Optional = bool.TryParse(node.Element("Optional")?.Value, out var o) && o,
+                Store = node.Element("Store")?.Value ?? string.Empty 
             };
         }
 
@@ -162,7 +174,8 @@ namespace ShoppingListPG4E.Models
                 Quantity = double.TryParse(node.Element("Quantity")?.Value, out var q) ? q : 1,
                 Purchased = bool.TryParse(node.Element("Purchased")?.Value, out var p) && p,
                 Category = node.Element("Category")?.Value ?? string.Empty,
-                Optional = bool.TryParse(node.Element("Optional")?.Value, out var o) && o 
+                Optional = bool.TryParse(node.Element("Optional")?.Value, out var o) && o,
+                Store = node.Element("Store")?.Value ?? string.Empty
             });
 
             return products;

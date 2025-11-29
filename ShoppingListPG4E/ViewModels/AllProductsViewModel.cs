@@ -15,19 +15,41 @@ namespace ShoppingListPG4E.ViewModels
     {
         public ObservableCollection<CategoryViewModel> Categories { get; } = new ObservableCollection<CategoryViewModel>();
 
+        public ObservableCollection<string> Stores { get; } = new ObservableCollection<string>(); // lista sklepów + "Wszystkie"
+
         public ICommand NewCommand { get; }
 
         private readonly Dictionary<string, CategoryViewModel> _categoryViewModels = new(StringComparer.OrdinalIgnoreCase);
 
+        private string _selectedStore = "Wszystkie"; // domyślnie pokazuj wszystkie
+        public string SelectedStore
+        {
+            get => _selectedStore;
+            set
+            {
+                var newVal = value ?? "Wszystkie";
+                if (_selectedStore != newVal)
+                {
+                    _selectedStore = newVal;
+                    OnPropertyChanged();
+                    LoadCategoriesAndProducts(); // przeładuj po zmianie
+                }
+            }
+        }
+
         public AllProductsViewModel()
         {
             NewCommand = new RelayCommand(OpenAddProductPage);
+            LoadStores();
             LoadCategoriesAndProducts();
         }
 
         private void OpenAddProductPage()
         {
-            Shell.Current.GoToAsync(nameof(ShoppingListPG4E.Views.ProductPage));
+            // przekazuj wybrany sklep, ale pomiń "Wszystkie" (brak filtra)
+            var store = string.Equals(SelectedStore, "Wszystkie", StringComparison.OrdinalIgnoreCase) ? string.Empty : SelectedStore;
+            var storeQuery = string.IsNullOrWhiteSpace(store) ? string.Empty : $"?store={Uri.EscapeDataString(store)}";
+            Shell.Current.GoToAsync($"{nameof(ShoppingListPG4E.Views.ProductPage)}{storeQuery}");
         }
 
         private List<string> LoadCategoriesFromXml()
@@ -46,12 +68,48 @@ namespace ShoppingListPG4E.ViewModels
             }
         }
 
+        private void LoadStores()
+        {
+            Stores.Clear();
+
+            // Dodaj specjalną pozycję "Wszystkie" na początku
+            Stores.Add("Wszystkie");
+
+            try
+            {
+                var doc = Models.Product.LoadOrCreateDocument();
+                var storesRoot = Models.Product.EnsureSection(doc, "Stores");
+                var list = storesRoot.Elements("Store").Select(x => x.Value).ToList();
+                if (!list.Contains("Inne...")) list.Add("Inne...");
+                foreach (var s in list) Stores.Add(s);
+            }
+            catch
+            {
+                foreach (var s in new[] { "Biedronka", "Lidl", "Selgros", "Auchan", "Inne..." })
+                    Stores.Add(s);
+            }
+
+            // jeśli SelectedStore nie jest na liście (np. po zmianach), ustaw "Wszystkie"
+            if (!Stores.Contains(SelectedStore))
+                SelectedStore = "Wszystkie";
+        }
+
         public void LoadCategoriesAndProducts()
         {
             ResetCollections();
 
             var definedCategories = LoadCategoriesFromXml();
             var products = LoadAllProducts();
+
+            // zastosuj filtr sklepu tylko gdy wybrano coś innego niż "Wszystkie"
+            if (!string.Equals(SelectedStore, "Wszystkie", StringComparison.OrdinalIgnoreCase)
+                && !string.IsNullOrWhiteSpace(SelectedStore))
+            {
+                products = products
+                    .Where(p => string.Equals(p.Store, SelectedStore, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
             var categoryMap = BuildCategoryMap(definedCategories, products);
             var displayCategories = ComputeDisplayCategories(categoryMap.Keys, definedCategories);
 
@@ -150,6 +208,12 @@ namespace ShoppingListPG4E.ViewModels
             if (query.ContainsKey("saved"))
             {
                 LoadCategoriesAndProducts();
+            }
+
+            if (query.TryGetValue("store", out var storeObj))
+            {
+                var store = storeObj?.ToString() ?? string.Empty;
+                SelectedStore = string.IsNullOrWhiteSpace(store) ? "Wszystkie" : store;
             }
         }
     }

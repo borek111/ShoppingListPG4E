@@ -1,8 +1,21 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ShoppingListPG4E.Views.ImportAndExportPage"
-             Title="Import / Export">
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:ShoppingListPG4E.ViewModels"
+    x:Class="ShoppingListPG4E.Views.ImportAndExportPage"
+    x:DataType="vm:ImportExportViewModel">
+
+    <ContentPage.Resources>
+        <!-- Utworzenie instancji VM jako zasób -->
+        <vm:ImportExportViewModel x:Key="ViewModel" />
+    </ContentPage.Resources>
+
+    <!-- Ustawienie BindingContext z zasobu -->
+    <ContentPage.BindingContext>
+        <StaticResource Key="ViewModel" />
+    </ContentPage.BindingContext>
+
     <VerticalStackLayout Padding="24" Spacing="16">
         <Label Text="Zarządzanie importem i exportem" FontAttributes="Bold" />
         <Button Text="Exportuj" Command="{Binding ExportCommand}" />

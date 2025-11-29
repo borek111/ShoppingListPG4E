@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:ViewModels="clr-namespace:ShoppingListPG4E.ViewModels"
-             x:Class="ShoppingListPG4E.Views.ProductPage"
-             x:DataType="ViewModels:ProductViewModel"
-             Title="Dodaj produkt">
+             xmlns:viewModels="clr-namespace:ShoppingListPG4E.ViewModels"
+             x:Class="ShoppingListPG4E.Views.ProductPage">
 
+    <!-- Upewnij się, że BindingContext to ProductViewModel (jeśli ustawiasz w code-behind, możesz usunąć ten Resource) -->
+    <ContentPage.Resources>
+        <viewModels:ProductViewModel x:Key="Vm" />
+    </ContentPage.Resources>
     <ContentPage.BindingContext>
-        <ViewModels:ProductViewModel/>
+        <StaticResource Key="Vm" />
     </ContentPage.BindingContext>
 
-    <ScrollView Orientation="Vertical" VerticalOptions="FillAndExpand">
-        <VerticalStackLayout Spacing="10" Margin="10">
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="12">
 
             <Entry Placeholder="Nazwa produktu" Text="{Binding Name, Mode=TwoWay}" />
 
@@ -30,6 +32,11 @@
                 <Entry Grid.Column="1" Text="{Binding Quantity, Mode=TwoWay}" Keyboard="Numeric" HorizontalTextAlignment="Center" HeightRequest="40" />
                 <Button Grid.Column="2" Text="+" Command="{Binding IncreaseCommand}" HeightRequest="40" />
             </Grid>
+
+            <Label Text="Sklep" />
+            <Picker Title="Sklep"
+                    ItemsSource="{Binding Stores}"
+                    SelectedItem="{Binding Store}" />
 
             <HorizontalStackLayout Spacing="8" Margin="0,6,0,0">
                 <Label Text="Opcjonalny:" VerticalTextAlignment="Center"/>

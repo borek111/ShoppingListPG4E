@@ -14,9 +14,11 @@ namespace ShoppingListPG4E.ViewModels
 
         public ObservableCollection<string> Units { get; private set; }
         public ObservableCollection<string> Categories { get; private set; }
+        public ObservableCollection<string> Stores { get; private set; } // NOWE: lista sklepów
 
         private bool _suppressCategoryPrompt = false;
         private bool _suppressUnitPrompt = false;
+        private bool _suppressStorePrompt = false; // NOWE
 
         // Callbacks
         public Action<ProductViewModel>? PurchasedChangedCallback { get; set; }
@@ -27,11 +29,14 @@ namespace ShoppingListPG4E.ViewModels
             _product = new Product();
             LoadUnits();
             LoadCategories();
+            LoadStores(); // NOWE
 
             if (Units != null && Units.Count > 0 && string.IsNullOrEmpty(_product.Unit))
                 _product.Unit = Units[0];
             if (Categories != null && Categories.Count > 0 && string.IsNullOrEmpty(_product.Category))
                 _product.Category = Categories[0];
+            if (Stores != null && Stores.Count > 0 && string.IsNullOrEmpty(_product.Store))
+                _product.Store = Stores[0]; // domyślnie pierwszy sklep
 
             InitializeCommands();
         }
@@ -41,11 +46,14 @@ namespace ShoppingListPG4E.ViewModels
             _product = product;
             LoadUnits();
             LoadCategories();
+            LoadStores(); // NOWE
 
             if (string.IsNullOrEmpty(_product.Unit) && Units != null && Units.Count > 0)
                 _product.Unit = Units[0];
             if (string.IsNullOrEmpty(_product.Category) && Categories != null && Categories.Count > 0)
                 _product.Category = Categories[0];
+            if (string.IsNullOrEmpty(_product.Store) && Stores != null && Stores.Count > 0)
+                _product.Store = Stores[0];
 
             InitializeCommands();
         }
@@ -122,6 +130,34 @@ namespace ShoppingListPG4E.ViewModels
             }
         }
 
+        public string Store
+        {
+            get => _product.Store;
+            set
+            {
+                if (_product.Store == value) return;
+
+                if (_suppressStorePrompt)
+                {
+                    _product.Store = value;
+                    _suppressStorePrompt = false;
+                    OnPropertyChanged();
+                    return;
+                }
+
+                if (value == "Inne...")
+                {
+                    _product.Store = value;
+                    OnPropertyChanged();
+                    _ = PromptForCustomStoreAsync(_product.Store);
+                    return;
+                }
+
+                _product.Store = value;
+                OnPropertyChanged();
+            }
+        }
+
         public double Quantity
         {
             get => _product.Quantity;
@@ -184,7 +220,7 @@ namespace ShoppingListPG4E.ViewModels
             CancelCommand = new RelayCommand(CancelProduct);
         }
 
-        private bool CanAddProduct() => !string.IsNullOrWhiteSpace(_product.Name);
+        private bool CanAddProduct  () => !string.IsNullOrWhiteSpace(_product.Name);
 
         // Command Methods
         private void Increase()
@@ -219,6 +255,9 @@ namespace ShoppingListPG4E.ViewModels
 
             if (string.IsNullOrWhiteSpace(_product.Category) && Categories != null && Categories.Count > 0)
                 _product.Category = Categories[0];
+
+            if (string.IsNullOrWhiteSpace(_product.Store) && Stores != null && Stores.Count > 0)
+                _product.Store = Stores[0];
 
             _product.Save();
             Shell.Current.GoToAsync($"..?saved={_product.Id}");
@@ -316,6 +355,49 @@ namespace ShoppingListPG4E.ViewModels
             OnPropertyChanged(nameof(Units));
         }
 
+        private void LoadStores()
+        {
+            try
+            {
+                var doc = Product.LoadOrCreateDocument();
+                var storesRoot = Product.EnsureSection(doc, "Stores");
+                var list = storesRoot.Elements("Store").Select(s => s.Value).ToList();
+                if (!list.Contains("Inne...")) list.Add("Inne...");
+                Stores = new ObservableCollection<string>(list);
+            }
+            catch
+            {
+                Stores = new ObservableCollection<string> { "Biedronka", "Lidl", "Selgros", "Auchan", "Inne..." };
+            }
+
+            OnPropertyChanged(nameof(Stores));
+        }
+
+        private void SaveStores()
+        {
+            var doc = Product.LoadOrCreateDocument();
+            var storesRoot = Product.EnsureSection(doc, "Stores");
+            storesRoot.RemoveAll();
+            foreach (var s in Stores)
+                storesRoot.Add(new XElement("Store", s));
+            doc.Save(Path.Combine(FileSystem.AppDataDirectory, "ShoppingList.xml"));
+        }
+
+        private void AddStoreToListAndSave(string store)
+        {
+            if (string.IsNullOrWhiteSpace(store)) return;
+            if (Stores.Any(s => string.Equals(s, store, StringComparison.OrdinalIgnoreCase))) return;
+
+            int idx = Stores.IndexOf("Inne...");
+            if (idx >= 0)
+                Stores.Insert(idx, store);
+            else
+                Stores.Add(store);
+
+            SaveStores();
+            OnPropertyChanged(nameof(Stores));
+        }
+
         private async Task PromptForCustomUnitAsync(string previousValue)
         {
             await MainThread.InvokeOnMainThreadAsync(async () =>
@@ -374,12 +456,42 @@ namespace ShoppingListPG4E.ViewModels
             });
         }
 
+        private async Task PromptForCustomStoreAsync(string previousValue)
+        {
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                string result = await Shell.Current.DisplayPromptAsync(
+                    "Nowy sklep",
+                    "Wpisz nazwę sklepu (np. Biedronka):",
+                    "Zapisz",
+                    "Anuluj",
+                    placeholder: "np. Biedronka",
+                    maxLength: -1,
+                    keyboard: Keyboard.Text);
+
+                if (!string.IsNullOrWhiteSpace(result))
+                {
+                    AddStoreToListAndSave(result.Trim());
+                    _suppressStorePrompt = true;
+                    _product.Store = result.Trim();
+                    OnPropertyChanged(nameof(Store));
+                }
+                else
+                {
+                    _suppressStorePrompt = true;
+                    _product.Store = previousValue ?? Stores.FirstOrDefault();
+                    OnPropertyChanged(nameof(Store));
+                }
+            });
+        }
+
         public void Reload()
         {
             _product = Product.Load(_product.Id);
             OnPropertyChanged(nameof(Name));
             OnPropertyChanged(nameof(Unit));
             OnPropertyChanged(nameof(Category));
+            OnPropertyChanged(nameof(Store)); // NOWE
             OnPropertyChanged(nameof(Quantity));
             OnPropertyChanged(nameof(Purchased));
         }
