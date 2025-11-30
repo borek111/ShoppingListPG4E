@@ -48,37 +48,45 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="vm:ProductViewModel">
                         <Frame HasShadow="False"
-                               CornerRadius="6"
-                               Padding="8"
-                               BackgroundColor="Transparent"
-                               Opacity="{Binding Purchased, Converter={StaticResource BoolToOpacityConverter}}">
-                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                <VerticalStackLayout>
-                                    <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                                        <Label Text="{Binding Name}" FontSize="16" />
-                                        <Label Text="opcjonalne"
-                                               IsVisible="{Binding Optional}"
-                                               TextColor="White"
-                                               BackgroundColor="#FF0000"
-                                               Padding="4,2"
-                                               FontAttributes="Bold"/>
-                                    </HorizontalStackLayout>
-                                    <HorizontalStackLayout Spacing="8">
-                                        <Label Text="{Binding Quantity, StringFormat='{}{0:0}'}" />
-                                        <Label Text="{Binding Unit}" />
-                                        <Label Text="-" />
-                                        <Label Text="{Binding Category}" />
-                                        <Label Text="-" />
-                                        <Label Text="{Binding Store}" />
-                                    </HorizontalStackLayout>
-                                </VerticalStackLayout>
+                           CornerRadius="6"
+                           Padding="8"
+                           BackgroundColor="Transparent"
+                           Opacity="{Binding Purchased, Converter={StaticResource BoolToOpacityConverter}}">
 
-                                <HorizontalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
+                            <VerticalStackLayout Spacing="8">
+
+                                <HorizontalStackLayout Spacing="8" 
+                                       VerticalOptions="Center"
+                                       HorizontalOptions="Center">
+
+                                    <Label Text="{Binding Name}" FontSize="16" FontAttributes="Bold" />
+
+                                    <Label Text="opcjonalne"
+                                       IsVisible="{Binding Optional}"
+                                       TextColor="White"
+                                       BackgroundColor="#FF0000"
+                                       Padding="4,2"
+                                       FontAttributes="Bold"/>
+
+                                    <Label Text="-" />
+                                    <Label Text="{Binding Quantity, StringFormat='{}{0:0}'}" />
+                                    <Label Text="{Binding Unit}" />
+
+                                    <Label Text="-" />
+                                    <Label Text="{Binding Category}" />
+                                    <Label Text="-" />
+                                    <Label Text="{Binding Store}" />
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Spacing="6" 
+                                       VerticalOptions="Center" 
+                                       HorizontalOptions="Center">
                                     <Label Text="Kupione:" VerticalTextAlignment="Center" Margin="0,0,4,0" />
                                     <CheckBox IsChecked="{Binding Purchased, Mode=TwoWay}" />
                                     <Button Text="Del" Command="{Binding DeleteCommand}" WidthRequest="64"/>
                                 </HorizontalStackLayout>
-                            </Grid>
+
+                            </VerticalStackLayout>
                         </Frame>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
