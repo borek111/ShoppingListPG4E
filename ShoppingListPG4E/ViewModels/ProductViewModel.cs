@@ -2,8 +2,8 @@
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using System.Xml.Linq;
-
 using ShoppingListPG4E.Models;
 
 namespace ShoppingListPG4E.ViewModels
@@ -14,11 +14,11 @@ namespace ShoppingListPG4E.ViewModels
 
         public ObservableCollection<string> Units { get; private set; }
         public ObservableCollection<string> Categories { get; private set; }
-        public ObservableCollection<string> Stores { get; private set; } // NOWE: lista sklepów
+        public ObservableCollection<string> Stores { get; private set; } 
 
         private bool _suppressCategoryPrompt = false;
         private bool _suppressUnitPrompt = false;
-        private bool _suppressStorePrompt = false; // NOWE
+        private bool _suppressStorePrompt = false; 
 
         // Callbacks
         public Action<ProductViewModel>? PurchasedChangedCallback { get; set; }
@@ -36,7 +36,7 @@ namespace ShoppingListPG4E.ViewModels
             if (Categories != null && Categories.Count > 0 && string.IsNullOrEmpty(_product.Category))
                 _product.Category = Categories[0];
             if (Stores != null && Stores.Count > 0 && string.IsNullOrEmpty(_product.Store))
-                _product.Store = Stores[0]; // domyślnie pierwszy sklep
+                _product.Store = Stores[0]; 
 
             InitializeCommands();
         }
@@ -46,7 +46,7 @@ namespace ShoppingListPG4E.ViewModels
             _product = product;
             LoadUnits();
             LoadCategories();
-            LoadStores(); // NOWE
+            LoadStores();
 
             if (string.IsNullOrEmpty(_product.Unit) && Units != null && Units.Count > 0)
                 _product.Unit = Units[0];
@@ -491,7 +491,7 @@ namespace ShoppingListPG4E.ViewModels
             OnPropertyChanged(nameof(Name));
             OnPropertyChanged(nameof(Unit));
             OnPropertyChanged(nameof(Category));
-            OnPropertyChanged(nameof(Store)); // NOWE
+            OnPropertyChanged(nameof(Store)); 
             OnPropertyChanged(nameof(Quantity));
             OnPropertyChanged(nameof(Purchased));
         }

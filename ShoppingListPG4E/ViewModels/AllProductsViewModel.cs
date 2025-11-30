@@ -7,7 +7,9 @@ using System.Windows.Input;
 using System.Xml.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Maui.Controls;
+
 
 namespace ShoppingListPG4E.ViewModels
 {
@@ -15,13 +17,13 @@ namespace ShoppingListPG4E.ViewModels
     {
         public ObservableCollection<CategoryViewModel> Categories { get; } = new ObservableCollection<CategoryViewModel>();
 
-        public ObservableCollection<string> Stores { get; } = new ObservableCollection<string>(); // lista sklepów + "Wszystkie"
+        public ObservableCollection<string> Stores { get; } = new ObservableCollection<string>();
 
         public ICommand NewCommand { get; }
 
         private readonly Dictionary<string, CategoryViewModel> _categoryViewModels = new(StringComparer.OrdinalIgnoreCase);
 
-        private string _selectedStore = "Wszystkie"; // domyślnie pokazuj wszystkie
+        private string _selectedStore = "Wszystkie"; 
         public string SelectedStore
         {
             get => _selectedStore;
@@ -32,7 +34,7 @@ namespace ShoppingListPG4E.ViewModels
                 {
                     _selectedStore = newVal;
                     OnPropertyChanged();
-                    LoadCategoriesAndProducts(); // przeładuj po zmianie
+                    LoadCategoriesAndProducts(); 
                 }
             }
         }
@@ -42,6 +44,7 @@ namespace ShoppingListPG4E.ViewModels
             NewCommand = new RelayCommand(OpenAddProductPage);
             LoadStores();
             LoadCategoriesAndProducts();
+
         }
 
         private void OpenAddProductPage()
@@ -71,8 +74,6 @@ namespace ShoppingListPG4E.ViewModels
         private void LoadStores()
         {
             Stores.Clear();
-
-            // Dodaj specjalną pozycję "Wszystkie" na początku
             Stores.Add("Wszystkie");
 
             try
@@ -101,7 +102,6 @@ namespace ShoppingListPG4E.ViewModels
             var definedCategories = LoadCategoriesFromXml();
             var products = LoadAllProducts();
 
-            // zastosuj filtr sklepu tylko gdy wybrano coś innego niż "Wszystkie"
             if (!string.Equals(SelectedStore, "Wszystkie", StringComparison.OrdinalIgnoreCase)
                 && !string.IsNullOrWhiteSpace(SelectedStore))
             {

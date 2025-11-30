@@ -7,11 +7,9 @@
     x:DataType="vm:ImportExportViewModel">
 
     <ContentPage.Resources>
-        <!-- Utworzenie instancji VM jako zasób -->
         <vm:ImportExportViewModel x:Key="ViewModel" />
     </ContentPage.Resources>
 
-    <!-- Ustawienie BindingContext z zasobu -->
     <ContentPage.BindingContext>
         <StaticResource Key="ViewModel" />
     </ContentPage.BindingContext>
