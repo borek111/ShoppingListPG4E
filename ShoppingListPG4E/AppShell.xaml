@@ -9,8 +9,10 @@
     Title="ShoppingListPG4E">
 
     <TabBar>
-        <ShellContent Title="Lista Zakupów" 
+        <ShellContent Title="Produkty według kategorii" 
                   ContentTemplate="{DataTemplate views:AllProductsPage}" />
+        <ShellContent Title="Lista do sklepu" 
+                  ContentTemplate="{DataTemplate views:ShoppingListPage}" />
         <ShellContent Title="Import/Export List" 
                   ContentTemplate="{DataTemplate views:ImportAndExportPage}" />
     </TabBar>

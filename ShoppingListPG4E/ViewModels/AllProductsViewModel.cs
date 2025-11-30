@@ -7,9 +7,7 @@ using System.Windows.Input;
 using System.Xml.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Maui.Controls;
-
 
 namespace ShoppingListPG4E.ViewModels
 {
