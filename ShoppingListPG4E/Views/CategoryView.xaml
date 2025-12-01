@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:ShoppingListPG4E.ViewModels"
              xmlns:conv="clr-namespace:ShoppingListPG4E.Converters"
+             xmlns:views="clr-namespace:ShoppingListPG4E.Views"
              x:Class="ShoppingListPG4E.Views.CategoryView"
              x:DataType="vm:CategoryViewModel">
 
@@ -47,47 +48,7 @@
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="vm:ProductViewModel">
-                        <Frame HasShadow="False"
-                           CornerRadius="6"
-                           Padding="8"
-                           BackgroundColor="Transparent"
-                           Opacity="{Binding Purchased, Converter={StaticResource BoolToOpacityConverter}}">
-
-                            <VerticalStackLayout Spacing="8">
-
-                                <HorizontalStackLayout Spacing="8" 
-                                       VerticalOptions="Center"
-                                       HorizontalOptions="Center">
-
-                                    <Label Text="{Binding Name}" FontSize="16" FontAttributes="Bold" />
-
-                                    <Label Text="opcjonalne"
-                                       IsVisible="{Binding Optional}"
-                                       TextColor="White"
-                                       BackgroundColor="#FF0000"
-                                       Padding="4,2"
-                                       FontAttributes="Bold"/>
-
-                                    <Label Text="-" />
-                                    <Label Text="{Binding Quantity, StringFormat='{}{0:0}'}" />
-                                    <Label Text="{Binding Unit}" />
-
-                                    <Label Text="-" />
-                                    <Label Text="{Binding Category}" />
-                                    <Label Text="-" />
-                                    <Label Text="{Binding Store}" />
-                                </HorizontalStackLayout>
-
-                                <HorizontalStackLayout Spacing="6" 
-                                       VerticalOptions="Center" 
-                                       HorizontalOptions="Center">
-                                    <Label Text="Kupione:" VerticalTextAlignment="Center" Margin="0,0,4,0" />
-                                    <CheckBox IsChecked="{Binding Purchased, Mode=TwoWay}" />
-                                    <Button Text="Usuń" Command="{Binding DeleteCommand}" WidthRequest="64"/>
-                                </HorizontalStackLayout>
-
-                            </VerticalStackLayout>
-                        </Frame>
+                        <views:ProductView />
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>

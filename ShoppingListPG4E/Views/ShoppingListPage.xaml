@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:viewModels="clr-namespace:ShoppingListPG4E.ViewModels"
+    xmlns:views="clr-namespace:ShoppingListPG4E.Views"
     Title="Lista do sklepu">
 
     <ContentPage.BindingContext>
@@ -12,43 +13,8 @@
 
     <CollectionView ItemsSource="{Binding Items}" SelectionMode="None">
         <CollectionView.ItemTemplate>
-            <DataTemplate>
-                <Grid Padding="15,10" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="15">
-
-                    <CheckBox Grid.Column="0" 
-                      IsChecked="{Binding Purchased, Mode=TwoWay}"
-                      VerticalOptions="Center" />
-
-                    <VerticalStackLayout Grid.Column="1" 
-                                 VerticalOptions="Center" 
-                                 Spacing="2">
-                        <Label Text="{Binding Name}"
-                       FontAttributes="Bold"
-                       FontSize="16"
-                       LineBreakMode="TailTruncation" />
-
-                        <Label Text="{Binding Category}"
-                         FontSize="12"/>
-
-						<Label Text="{Binding Store}"
-					     FontSize="12"/>
-                    </VerticalStackLayout>
-
-                    <HorizontalStackLayout Grid.Column="2" 
-                                   VerticalOptions="Center" 
-                                   HorizontalOptions="End" 
-                                   Spacing="5">
-                        <Label Text="{Binding Quantity}"
-                       FontSize="16"
-                       FontAttributes="Bold"
-                       VerticalOptions="End" />
-
-                        <Label Text="{Binding Unit}"
-                       FontSize="16"
-                       VerticalOptions="End" />
-                    </HorizontalStackLayout>
-
-                </Grid>
+            <DataTemplate x:DataType="viewModels:ProductViewModel">
+                <views:ProductView />
             </DataTemplate>
         </CollectionView.ItemTemplate>
     </CollectionView>
