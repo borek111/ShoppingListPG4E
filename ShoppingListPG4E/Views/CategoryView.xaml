@@ -83,7 +83,7 @@
                                        HorizontalOptions="Center">
                                     <Label Text="Kupione:" VerticalTextAlignment="Center" Margin="0,0,4,0" />
                                     <CheckBox IsChecked="{Binding Purchased, Mode=TwoWay}" />
-                                    <Button Text="Del" Command="{Binding DeleteCommand}" WidthRequest="64"/>
+                                    <Button Text="Usuń" Command="{Binding DeleteCommand}" WidthRequest="64"/>
                                 </HorizontalStackLayout>
 
                             </VerticalStackLayout>
