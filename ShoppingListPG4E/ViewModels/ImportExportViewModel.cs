@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Maui.Storage; 
+using CommunityToolkit.Maui.Storage;
 using Microsoft.Maui.Storage;
 using ShoppingListPG4E.Models;
 using System.Windows.Input;
@@ -34,7 +34,7 @@ namespace ShoppingListPG4E.ViewModels
         {
             try
             {
-                await using var readStream = await ShoppingListFile.OpenReadAsync();
+                await using var readStream = await Product.OpenReadAsync();
 
                 var saveResult = await FileSaver.Default.SaveAsync("ShoppingList.xml", readStream, CancellationToken.None);
 
@@ -47,7 +47,7 @@ namespace ShoppingListPG4E.ViewModels
             }
             catch (Exception ex)
             {
-                Status = $"B³¹d exportu: {ex.Message}";
+                Status = $"B³¹d eksportu: {ex.Message}";
             }
         }
 
@@ -76,7 +76,7 @@ namespace ShoppingListPG4E.ViewModels
                 }
 
                 await using var src = await picked.OpenReadAsync();
-                await ShoppingListFile.ReplaceWithAsync(src);
+                await Product.ReplaceWithAsync(src);
 
                 Status = "Zaimportowano listê zakupów.";
             }

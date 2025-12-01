@@ -2,22 +2,52 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml.Linq;
+using Microsoft.Maui.Storage;
 
 namespace ShoppingListPG4E.Models
 {
     public class Product
     {
-        public string Id { get; set; } 
-        public string Name { get; set; }
-        public string Unit { get; set; } 
-        public double Quantity { get; set; }
-        public bool Purchased { get; set; } 
-        public string Category { get; set; } 
-        public bool Optional { get; set; }
-        public string Store { get; set; } 
+        // Wspólna ścieżka do pliku XML dla całej aplikacji
+        public static string AppXmlPath => Path.Combine(FileSystem.AppDataDirectory, "ShoppingList.xml");
 
-        private static string XmlPath => Path.Combine(FileSystem.AppDataDirectory, "ShoppingList.xml");
+        // Tworzy plik jeśli nie istnieje
+        public static void EnsureCreated()
+        {
+            if (File.Exists(AppXmlPath))
+                return;
+
+            var doc = LoadOrCreateDocument();
+            doc.Save(AppXmlPath);
+        }
+
+        // Udostępnianie pliku do eksportu
+        public static Task<Stream> OpenReadAsync()
+        {
+            EnsureCreated();
+            Stream stream = File.OpenRead(AppXmlPath);
+            return Task.FromResult(stream);
+        }
+
+        // Podmiana pliku przy imporcie
+        public static async Task ReplaceWithAsync(Stream source, CancellationToken cancellationToken = default)
+        {
+            Directory.CreateDirectory(FileSystem.AppDataDirectory);
+            await using var dst = File.Create(AppXmlPath);
+            await source.CopyToAsync(dst, cancellationToken);
+        }
+
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string Unit { get; set; }
+        public double Quantity { get; set; }
+        public bool Purchased { get; set; }
+        public string Category { get; set; }
+        public bool Optional { get; set; }
+        public string Store { get; set; }
 
         public Product()
         {
@@ -33,10 +63,8 @@ namespace ShoppingListPG4E.Models
 
         public static XDocument LoadOrCreateDocument()
         {
-            if (File.Exists(XmlPath))
-            {
-                return XDocument.Load(XmlPath);
-            }
+            if (File.Exists(AppXmlPath))
+                return XDocument.Load(AppXmlPath);
 
             var doc = new XDocument(
                 new XElement("ShoppingList",
@@ -57,7 +85,6 @@ namespace ShoppingListPG4E.Models
                         new XElement("Unit", "ml"),
                         new XElement("Unit", "Inne...")
                     ),
-                    
                     new XElement("Stores",
                         new XElement("Store", "Biedronka"),
                         new XElement("Store", "Lidl"),
@@ -68,7 +95,7 @@ namespace ShoppingListPG4E.Models
                     new XElement("Products")
                 )
             );
-            doc.Save(XmlPath);
+            doc.Save(AppXmlPath);
             return doc;
         }
 
@@ -110,25 +137,25 @@ namespace ShoppingListPG4E.Models
                     new XElement("Purchased", Purchased),
                     new XElement("Category", Category),
                     new XElement("Optional", Optional),
-                    new XElement("Store", Store ?? string.Empty) 
+                    new XElement("Store", Store ?? string.Empty)
                 ));
             }
 
-            doc.Save(XmlPath);
+            doc.Save(AppXmlPath);
         }
 
         public void Delete()
         {
-            if (!File.Exists(XmlPath)) return;
+            if (!File.Exists(AppXmlPath)) return;
 
-            var doc = XDocument.Load(XmlPath);
+            var doc = XDocument.Load(AppXmlPath);
             var productsRoot = EnsureSection(doc, "Products");
 
             var node = productsRoot.Elements("Product").FirstOrDefault(x => x.Attribute("Id")?.Value == Id);
             if (node != null)
             {
                 node.Remove();
-                doc.Save(XmlPath);
+                doc.Save(AppXmlPath);
             }
         }
 
@@ -139,9 +166,7 @@ namespace ShoppingListPG4E.Models
 
             var node = productsRoot.Elements("Product").FirstOrDefault(x => x.Attribute("Id")?.Value == id);
             if (node == null)
-            {
                 return new Product { Id = id };
-            }
 
             return new Product
             {
@@ -152,18 +177,16 @@ namespace ShoppingListPG4E.Models
                 Purchased = bool.TryParse(node.Element("Purchased")?.Value, out var p) && p,
                 Category = node.Element("Category")?.Value ?? string.Empty,
                 Optional = bool.TryParse(node.Element("Optional")?.Value, out var o) && o,
-                Store = node.Element("Store")?.Value ?? string.Empty 
+                Store = node.Element("Store")?.Value ?? string.Empty
             };
         }
 
         public static IEnumerable<Product> LoadAll()
         {
-            if (!File.Exists(XmlPath))
-            {
+            if (!File.Exists(AppXmlPath))
                 return new List<Product>();
-            }
 
-            var doc = XDocument.Load(XmlPath);
+            var doc = XDocument.Load(AppXmlPath);
             var productsRoot = EnsureSection(doc, "Products");
 
             var products = productsRoot.Elements("Product").Select(node => new Product
