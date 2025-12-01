@@ -4,7 +4,6 @@
              xmlns:viewModels="clr-namespace:ShoppingListPG4E.ViewModels"
              x:Class="ShoppingListPG4E.Views.ProductPage">
 
-    <!-- Upewnij się, że BindingContext to ProductViewModel (jeśli ustawiasz w code-behind, możesz usunąć ten Resource) -->
     <ContentPage.Resources>
         <viewModels:ProductViewModel x:Key="Vm" />
     </ContentPage.Resources>
