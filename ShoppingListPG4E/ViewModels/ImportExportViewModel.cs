@@ -30,19 +30,12 @@ namespace ShoppingListPG4E.ViewModels
             ImportCommand = new AsyncRelayCommand(ImportAsync);
         }
 
-        private static string AppXmlPath => Path.Combine(FileSystem.AppDataDirectory, "ShoppingList.xml");
-
         private async Task ExportAsync()
         {
             try
             {
-                if (!File.Exists(AppXmlPath))
-                {
-                    var doc = Product.LoadOrCreateDocument();
-                    doc.Save(AppXmlPath);
-                }
+                await using var readStream = await ShoppingListFile.OpenReadAsync();
 
-                await using var readStream = File.OpenRead(AppXmlPath);
                 var saveResult = await FileSaver.Default.SaveAsync("ShoppingList.xml", readStream, CancellationToken.None);
 
                 if (saveResult.IsSuccessful)
@@ -83,9 +76,7 @@ namespace ShoppingListPG4E.ViewModels
                 }
 
                 await using var src = await picked.OpenReadAsync();
-                Directory.CreateDirectory(FileSystem.AppDataDirectory);
-                await using var dst = File.Create(AppXmlPath);
-                await src.CopyToAsync(dst);
+                await ShoppingListFile.ReplaceWithAsync(src);
 
                 Status = "Zaimportowano listê zakupów.";
             }

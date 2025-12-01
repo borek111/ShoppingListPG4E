@@ -28,8 +28,10 @@
                        LineBreakMode="TailTruncation" />
 
                         <Label Text="{Binding Category}"
-                       FontSize="12"
-                       TextColor="{DynamicResource SecondaryTextColor}" />
+                         FontSize="12"/>
+
+						<Label Text="{Binding Store}"
+					     FontSize="12"/>
                     </VerticalStackLayout>
 
                     <HorizontalStackLayout Grid.Column="2" 
