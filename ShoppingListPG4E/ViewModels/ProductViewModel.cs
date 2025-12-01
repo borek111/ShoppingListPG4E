@@ -28,7 +28,7 @@ namespace ShoppingListPG4E.ViewModels
             _product = new Product();
             LoadUnits();
             LoadCategories();
-            LoadStores(); // NOWE
+            LoadStores(); 
 
             if (Units != null && Units.Count > 0 && string.IsNullOrEmpty(_product.Unit))
                 _product.Unit = Units[0];
