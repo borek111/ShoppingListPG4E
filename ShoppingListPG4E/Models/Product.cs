@@ -11,10 +11,8 @@ namespace ShoppingListPG4E.Models
 {
     public class Product
     {
-        // Wspólna ścieżka do pliku XML dla całej aplikacji
         public static string AppXmlPath => Path.Combine(FileSystem.AppDataDirectory, "ShoppingList.xml");
 
-        // Tworzy plik jeśli nie istnieje
         public static void EnsureCreated()
         {
             if (File.Exists(AppXmlPath))
@@ -32,7 +30,6 @@ namespace ShoppingListPG4E.Models
             return Task.FromResult(stream);
         }
 
-        // Podmiana pliku przy imporcie
         public static async Task ReplaceWithAsync(Stream source, CancellationToken cancellationToken = default)
         {
             Directory.CreateDirectory(FileSystem.AppDataDirectory);
