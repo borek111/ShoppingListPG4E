@@ -28,7 +28,7 @@
                     SelectedItem="{Binding SelectedStore, Mode=TwoWay}" />
         </HorizontalStackLayout>
 
-        <!-- Category/Product List -->
+        <!-- category and product list -->
         <CollectionView Grid.Row="1" ItemsSource="{Binding Categories}">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
