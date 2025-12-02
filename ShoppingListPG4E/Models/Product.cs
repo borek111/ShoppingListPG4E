@@ -13,19 +13,10 @@ namespace ShoppingListPG4E.Models
     {
         public static string AppXmlPath => Path.Combine(FileSystem.AppDataDirectory, "ShoppingList.xml");
 
-        public static void EnsureCreated()
-        {
-            if (File.Exists(AppXmlPath))
-                return;
-
-            var doc = LoadOrCreateDocument();
-            doc.Save(AppXmlPath);
-        }
 
         // Udostępnianie pliku do eksportu
         public static Task<Stream> OpenReadAsync()
         {
-            EnsureCreated();
             Stream stream = File.OpenRead(AppXmlPath);
             return Task.FromResult(stream);
         }

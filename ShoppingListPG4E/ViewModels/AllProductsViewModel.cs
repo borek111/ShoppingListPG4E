@@ -21,18 +21,18 @@ namespace ShoppingListPG4E.ViewModels
 
         private readonly Dictionary<string, CategoryViewModel> _categoryViewModels = new(StringComparer.OrdinalIgnoreCase);
 
-        private string _selectedStore = "Wszystkie"; 
+        private string _selectedStore = "Wszystkie";
         public string SelectedStore
         {
             get => _selectedStore;
             set
             {
-                var newVal = value ?? "Wszystkie";
-                if (_selectedStore != newVal)
+                var newValue = value ?? "Wszystkie";
+                if (_selectedStore != newValue)
                 {
-                    _selectedStore = newVal;
+                    _selectedStore = newValue;
                     OnPropertyChanged();
-                    LoadCategoriesAndProducts(); 
+                    LoadCategoriesAndProducts();
                 }
             }
         }
@@ -42,7 +42,6 @@ namespace ShoppingListPG4E.ViewModels
             NewCommand = new RelayCommand(OpenAddProductPage);
             LoadStores();
             LoadCategoriesAndProducts();
-
         }
 
         private void OpenAddProductPage()
@@ -57,11 +56,14 @@ namespace ShoppingListPG4E.ViewModels
         {
             try
             {
-                var doc = Models.Product.LoadOrCreateDocument();
-                var categoriesRoot = Models.Product.EnsureSection(doc, "Categories");
-                var list = categoriesRoot.Elements("Category").Select(x => x.Value).ToList();
-                if (!list.Contains("Inne...")) list.Add("Inne...");
-                return list;
+                var document = Models.Product.LoadOrCreateDocument();
+                var categoriesRoot = Models.Product.EnsureSection(document, "Categories");
+                var categoryList = categoriesRoot
+                    .Elements("Category")
+                    .Select(categoryElement => categoryElement.Value)
+                    .ToList();
+                if (!categoryList.Contains("Inne...")) categoryList.Add("Inne...");
+                return categoryList;
             }
             catch
             {
@@ -76,16 +78,19 @@ namespace ShoppingListPG4E.ViewModels
 
             try
             {
-                var doc = Models.Product.LoadOrCreateDocument();
-                var storesRoot = Models.Product.EnsureSection(doc, "Stores");
-                var list = storesRoot.Elements("Store").Select(x => x.Value).ToList();
-                if (!list.Contains("Inne...")) list.Add("Inne...");
-                foreach (var s in list) Stores.Add(s);
+                var document = Models.Product.LoadOrCreateDocument();
+                var storesRoot = Models.Product.EnsureSection(document, "Stores");
+                var storeList = storesRoot
+                    .Elements("Store")
+                    .Select(storeElement => storeElement.Value)
+                    .ToList();
+                if (!storeList.Contains("Inne...")) storeList.Add("Inne...");
+                foreach (var storeName in storeList) Stores.Add(storeName);
             }
             catch
             {
-                foreach (var s in new[] { "Biedronka", "Lidl", "Selgros", "Auchan", "Inne..." })
-                    Stores.Add(s);
+                foreach (var storeName in new[] { "Biedronka", "Lidl", "Selgros", "Auchan", "Inne..." })
+                    Stores.Add(storeName);
             }
 
             // jeśli SelectedStore nie jest na liście (np. po zmianach), ustaw "Wszystkie"
@@ -104,14 +109,14 @@ namespace ShoppingListPG4E.ViewModels
                 && !string.IsNullOrWhiteSpace(SelectedStore))
             {
                 products = products
-                    .Where(p => string.Equals(p.Store, SelectedStore, StringComparison.OrdinalIgnoreCase))
+                    .Where(product => string.Equals(product.Store, SelectedStore, StringComparison.OrdinalIgnoreCase))
                     .ToList();
             }
 
-            var categoryMap = BuildCategoryMap(definedCategories, products);
-            var displayCategories = ComputeDisplayCategories(categoryMap.Keys, definedCategories);
+            var categoryToProductsMap = BuildCategoryMap(definedCategories, products);
+            var displayCategories = ComputeDisplayCategories(categoryToProductsMap.Keys, definedCategories);
 
-            BuildAndAttachCategoryViewModels(displayCategories, categoryMap);
+            BuildAndAttachCategoryViewModels(displayCategories, categoryToProductsMap);
         }
 
         private void ResetCollections()
@@ -123,82 +128,82 @@ namespace ShoppingListPG4E.ViewModels
         private List<ProductViewModel> LoadAllProducts()
         {
             return Models.Product.LoadAll()
-                .Select(p => new ProductViewModel(p))
+                .Select(product => new ProductViewModel(product))
                 .ToList();
         }
 
         private Dictionary<string, List<ProductViewModel>> BuildCategoryMap(List<string> definedCategories, List<ProductViewModel> products)
         {
-            var categoryMap = new Dictionary<string, List<ProductViewModel>>(StringComparer.OrdinalIgnoreCase);
+            var categoryToProductsMap = new Dictionary<string, List<ProductViewModel>>(StringComparer.OrdinalIgnoreCase);
 
             // inicjalizuj wpisy dla zdefiniowanych kategorii
-            foreach (var c in definedCategories)
+            foreach (var category in definedCategories)
             {
-                if (!categoryMap.ContainsKey(c))
-                    categoryMap[c] = new List<ProductViewModel>();
+                if (!categoryToProductsMap.ContainsKey(category))
+                    categoryToProductsMap[category] = new List<ProductViewModel>();
             }
 
             // rozdziel produkty do słownika, dodając brakujące kategorie
-            foreach (var pv in products)
+            foreach (var productViewModel in products)
             {
-                var catName = string.IsNullOrWhiteSpace(pv.Category) ? "Bez kategorii" : pv.Category;
+                var categoryName = string.IsNullOrWhiteSpace(productViewModel.Category) ? "Bez kategorii" : productViewModel.Category;
 
-                if (!categoryMap.ContainsKey(catName))
+                if (!categoryToProductsMap.ContainsKey(categoryName))
                 {
-                    categoryMap[catName] = new List<ProductViewModel>();
-                    definedCategories.Add(catName);
+                    categoryToProductsMap[categoryName] = new List<ProductViewModel>();
+                    definedCategories.Add(categoryName);
                 }
 
-                categoryMap[catName].Add(pv);
+                categoryToProductsMap[categoryName].Add(productViewModel);
             }
 
-            return categoryMap;
+            return categoryToProductsMap;
         }
 
         private List<string> ComputeDisplayCategories(IEnumerable<string> categoriesInMap, List<string> definedCategories)
         {
             return categoriesInMap
-                .Where(c => !string.Equals(c, "Inne...", StringComparison.OrdinalIgnoreCase))
-                .OrderBy(c => definedCategories.FindIndex(dc => dc.Equals(c, StringComparison.OrdinalIgnoreCase)))
+                .Where(category => !string.Equals(category, "Inne...", StringComparison.OrdinalIgnoreCase))
+                .OrderBy(category => definedCategories.FindIndex(definedCategory => definedCategory.Equals(category, StringComparison.OrdinalIgnoreCase)))
                 .ToList();
         }
 
-        private void BuildAndAttachCategoryViewModels(List<string> displayCategories, Dictionary<string, List<ProductViewModel>> categoryMap)
+        private void BuildAndAttachCategoryViewModels(List<string> displayCategories, Dictionary<string, List<ProductViewModel>> categoryToProductsMap)
         {
-            foreach (var catName in displayCategories)
+            foreach (var categoryName in displayCategories)
             {
-                var orderedProducts = categoryMap[catName]
-                    .OrderBy(p => p.Purchased)
-                    .ThenBy(p => p.Name)
+                var orderedProducts = categoryToProductsMap[categoryName]
+                    .OrderBy(product => product.Purchased)
+                    .ThenBy(product => product.Name)
                     .ToList();
 
-                var catVm = new CategoryViewModel(catName, orderedProducts);
+                var categoryViewModel = new CategoryViewModel(categoryName, orderedProducts);
 
-                foreach (var pv in catVm.Products)
+                foreach (var productViewModel in categoryViewModel.Products)
                 {
-                    pv.PurchasedChangedCallback = _ => catVm.RefreshOrder();
-                    pv.DeletedCallback = OnProductDeleted;
+                    productViewModel.PurchasedChangedCallback = _ => categoryViewModel.RefreshOrder();
+                    productViewModel.DeletedCallback = OnProductDeleted;
                 }
 
-                _categoryViewModels[catName] = catVm;
-                Categories.Add(catVm);
+                _categoryViewModels[categoryName] = categoryViewModel;
+                Categories.Add(categoryViewModel);
             }
         }
 
-        private void OnProductDeleted(ProductViewModel deleted)
+        private void OnProductDeleted(ProductViewModel deletedProductViewModel)
         {
-            var cat = _categoryViewModels.Values.FirstOrDefault(c => c.Products.Contains(deleted));
-            if (cat != null)
+            var categoryViewModel = _categoryViewModels.Values.FirstOrDefault(vm => vm.Products.Contains(deletedProductViewModel));
+            if (categoryViewModel != null)
             {
-                cat.Products.Remove(deleted);
-                cat.RefreshOrder();
+                categoryViewModel.Products.Remove(deletedProductViewModel);
+                categoryViewModel.RefreshOrder();
             }
         }
 
         public void RefreshAllCategoriesOrdering()
         {
-            foreach (var cat in Categories)
-                cat.RefreshOrder();
+            foreach (var categoryViewModel in Categories)
+                categoryViewModel.RefreshOrder();
         }
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)

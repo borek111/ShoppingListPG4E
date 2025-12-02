@@ -58,8 +58,8 @@ namespace ShoppingListPG4E.ViewModels
                 var xmlTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
                 {
                     { DevicePlatform.Android, new[] { "application/xml", "text/xml" } },
-                    { DevicePlatform.WinUI,   new[] { ".xml" } },
-                    { DevicePlatform.iOS,     new[] { "public.xml" } },
+                    { DevicePlatform.WinUI, new[] { ".xml" } },
+                    { DevicePlatform.iOS, new[] { "public.xml" } },
                     { DevicePlatform.MacCatalyst, new[] { "public.xml" } },
                 });
 

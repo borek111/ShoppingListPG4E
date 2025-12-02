@@ -39,9 +39,14 @@ namespace ShoppingListPG4E.ViewModels
 
         public void RefreshOrder()
         {
-            var ordered = Products.OrderBy(p => p.Purchased).ThenBy(p => p.Name).ToList();
+            var ordered = Products
+                .OrderBy(productViewModel => productViewModel.Purchased)
+                .ThenBy(productViewModel => productViewModel.Name)
+                .ToList();
+
             Products.Clear();
-            foreach (var p in ordered) Products.Add(p);
+            foreach (var productViewModel in ordered)
+                Products.Add(productViewModel);
         }
     }
 }

@@ -4,48 +4,43 @@
              xmlns:viewModels="clr-namespace:ShoppingListPG4E.ViewModels"
              x:Class="ShoppingListPG4E.Views.ProductPage">
 
+    <!-- Zasób: ViewModel produktu -->
     <ContentPage.Resources>
-        <viewModels:ProductViewModel x:Key="Vm" />
+        <viewModels:ProductViewModel x:Key="Vm"/>
     </ContentPage.Resources>
+
+    <!-- Powiązanie kontekstu z ViewModelem -->
     <ContentPage.BindingContext>
         <StaticResource Key="Vm" />
     </ContentPage.BindingContext>
 
-    <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="12">
+    <Grid Padding="12" RowSpacing="10" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*">
+        <!-- Pole: nazwa produktu -->
+        <Entry Grid.Row="0" Placeholder="Nazwa" Text="{Binding Name, Mode=TwoWay}" />
 
-            <Entry Placeholder="Nazwa produktu" Text="{Binding Name, Mode=TwoWay}" />
+        <!-- Pole: ilość -->
+        <Entry Grid.Row="1" Placeholder="Ilość" Keyboard="Numeric" Text="{Binding Quantity, Mode=TwoWay}" />
 
-            <Label Text="Kategoria:" />
-            <Picker Title="Wybierz kategorię"
-                    ItemsSource="{Binding Categories}"
-                    SelectedItem="{Binding Category, Mode=TwoWay}" />
+        <!-- Pole: jednostka -->
+        <Picker Grid.Row="2" Title="Jednostka" ItemsSource="{Binding Units}" SelectedItem="{Binding Unit, Mode=TwoWay}" />
 
-            <Label Text="Jednostka:" />
-            <Picker Title="Wybierz jednostkę"
-                    ItemsSource="{Binding Units}"
-                    SelectedItem="{Binding Unit, Mode=TwoWay}" />
+        <!-- Pole: kategoria -->
+        <Picker Grid.Row="3" Title="Kategoria" ItemsSource="{Binding Categories}" SelectedItem="{Binding Category, Mode=TwoWay}" />
 
-            <Grid ColumnDefinitions="50,*,50" ColumnSpacing="8">
-                <Button Grid.Column="0" Text="-" Command="{Binding DecreaseCommand}" HeightRequest="40" />
-                <Entry Grid.Column="1" Text="{Binding Quantity, Mode=TwoWay}" Keyboard="Numeric" HorizontalTextAlignment="Center" HeightRequest="40" />
-                <Button Grid.Column="2" Text="+" Command="{Binding IncreaseCommand}" HeightRequest="40" />
-            </Grid>
+        <!-- Pole: sklep -->
+        <Picker Grid.Row="4" Title="Sklep" ItemsSource="{Binding Stores}" SelectedItem="{Binding Store, Mode=TwoWay}" />
 
-            <Label Text="Sklep" />
-            <Picker Title="Sklep"
-                    ItemsSource="{Binding Stores}"
-                    SelectedItem="{Binding Store}" />
+        <!-- Przełącznik: pozycja opcjonalna -->
+        <Switch Grid.Row="5" IsToggled="{Binding Optional, Mode=TwoWay}">
+            <Switch.Triggers>
+                <DataTrigger TargetType="Switch" Binding="{Binding Optional}" Value="True" />
+            </Switch.Triggers>
+        </Switch>
 
-            <HorizontalStackLayout Spacing="8" Margin="0,6,0,0">
-                <Label Text="Opcjonalny:" VerticalTextAlignment="Center"/>
-                <Switch IsToggled="{Binding Optional, Mode=TwoWay}" />
-            </HorizontalStackLayout>
-
-            <HorizontalStackLayout Spacing="10" Margin="0,10,0,0" HorizontalOptions="Fill">
-                <Button Text="Dodaj produkt" Command="{Binding AddCommand}" HorizontalOptions="FillAndExpand"/>
-                <Button Text="Anuluj dodawanie" Command="{Binding CancelCommand}" HorizontalOptions="FillAndExpand"/>
-            </HorizontalStackLayout>
-        </VerticalStackLayout>
-    </ScrollView>
+        <!-- Akcje: Zapisz / Anuluj -->
+        <HorizontalStackLayout Grid.Row="6" Spacing="10">
+            <Button Text="Zapisz" Command="{Binding AddCommand}" />
+            <Button Text="Anuluj" Command="{Binding CancelCommand}" />
+        </HorizontalStackLayout>
+    </Grid>
 </ContentPage>

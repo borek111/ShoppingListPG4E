@@ -26,7 +26,6 @@ namespace ShoppingListPG4E.ViewModels
                 var categoriesRoot = Models.Product.EnsureSection(doc, "Categories");
                 var list = categoriesRoot.Elements("Category").Select(x => x.Value).ToList();
                 if (!list.Contains("Inne...")) list.Add("Inne...");
-                // Zapewnij pozycjê "Bez kategorii" jeœli pojawi siê w danych
                 if (!list.Contains("Bez kategorii")) list.Add("Bez kategorii");
                 return list;
             }
