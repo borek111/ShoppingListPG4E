@@ -13,11 +13,11 @@ namespace ShoppingListPG4E.ViewModels
 
         public ObservableCollection<string> Units { get; private set; }
         public ObservableCollection<string> Categories { get; private set; }
-        public ObservableCollection<string> Stores { get; private set; } 
+        public ObservableCollection<string> Stores { get; private set; }
 
         private bool _suppressCategoryPrompt = false;
         private bool _suppressUnitPrompt = false;
-        private bool _suppressStorePrompt = false; 
+        private bool _suppressStorePrompt = false;
 
         // Callbacks
         public Action<ProductViewModel>? PurchasedChangedCallback { get; set; }
@@ -28,14 +28,14 @@ namespace ShoppingListPG4E.ViewModels
             _product = new Product();
             LoadUnits();
             LoadCategories();
-            LoadStores(); 
+            LoadStores();
 
             if (Units != null && Units.Count > 0 && string.IsNullOrEmpty(_product.Unit))
                 _product.Unit = Units[0];
             if (Categories != null && Categories.Count > 0 && string.IsNullOrEmpty(_product.Category))
                 _product.Category = Categories[0];
             if (Stores != null && Stores.Count > 0 && string.IsNullOrEmpty(_product.Store))
-                _product.Store = Stores[0]; 
+                _product.Store = Stores[0];
 
             InitializeCommands();
         }
@@ -63,7 +63,7 @@ namespace ShoppingListPG4E.ViewModels
             get => _product.Name;
             set
             {
-                var cleaned = value?.Trim() ?? string.Empty;
+                string cleaned = value?.Trim() ?? string.Empty;
                 if (_product.Name != cleaned)
                 {
                     _product.Name = cleaned;
@@ -219,7 +219,7 @@ namespace ShoppingListPG4E.ViewModels
             CancelCommand = new RelayCommand(CancelProduct);
         }
 
-        private bool CanAddProduct  () => !string.IsNullOrWhiteSpace(_product.Name);
+        private bool CanAddProduct() => !string.IsNullOrWhiteSpace(_product.Name);
 
         // Command Methods
         private void Increase()
@@ -272,9 +272,9 @@ namespace ShoppingListPG4E.ViewModels
         {
             try
             {
-                var doc = Product.LoadOrCreateDocument();
-                var categoriesRoot = Product.EnsureSection(doc, "Categories");
-                var list = categoriesRoot.Elements("Category").Select(x => x.Value).ToList();
+                XDocument doc = Product.LoadOrCreateDocument();
+                XElement categoriesRoot = Product.EnsureSection(doc, "Categories");
+                List<string> list = categoriesRoot.Elements("Category").Select(x => x.Value).ToList();
                 if (!list.Contains("Inne...")) list.Add("Inne...");
                 Categories = new ObservableCollection<string>(list);
             }
@@ -288,10 +288,10 @@ namespace ShoppingListPG4E.ViewModels
 
         private void SaveCategories()
         {
-            var doc = Product.LoadOrCreateDocument();
-            var categoriesRoot = Product.EnsureSection(doc, "Categories");
+            XDocument doc = Product.LoadOrCreateDocument();
+            XElement categoriesRoot = Product.EnsureSection(doc, "Categories");
             categoriesRoot.RemoveAll();
-            foreach (var c in Categories)
+            foreach (string c in Categories)
                 categoriesRoot.Add(new XElement("Category", c));
             doc.Save(Path.Combine(FileSystem.AppDataDirectory, "ShoppingList.xml"));
         }
@@ -315,9 +315,9 @@ namespace ShoppingListPG4E.ViewModels
         {
             try
             {
-                var doc = Product.LoadOrCreateDocument();
-                var unitsRoot = Product.EnsureSection(doc, "Units");
-                var list = unitsRoot.Elements("Unit").Select(u => u.Value).ToList();
+                XDocument doc = Product.LoadOrCreateDocument();
+                XElement unitsRoot = Product.EnsureSection(doc, "Units");
+                List<string> list = unitsRoot.Elements("Unit").Select(u => u.Value).ToList();
                 if (!list.Contains("Inne...")) list.Add("Inne...");
                 Units = new ObservableCollection<string>(list);
             }
@@ -331,10 +331,10 @@ namespace ShoppingListPG4E.ViewModels
 
         private void SaveUnits()
         {
-            var doc = Product.LoadOrCreateDocument();
-            var unitsRoot = Product.EnsureSection(doc, "Units");
+            XDocument doc = Product.LoadOrCreateDocument();
+            XElement unitsRoot = Product.EnsureSection(doc, "Units");
             unitsRoot.RemoveAll();
-            foreach (var u in Units)
+            foreach (string u in Units)
                 unitsRoot.Add(new XElement("Unit", u));
             doc.Save(Path.Combine(FileSystem.AppDataDirectory, "ShoppingList.xml"));
         }
@@ -358,9 +358,9 @@ namespace ShoppingListPG4E.ViewModels
         {
             try
             {
-                var doc = Product.LoadOrCreateDocument();
-                var storesRoot = Product.EnsureSection(doc, "Stores");
-                var list = storesRoot.Elements("Store").Select(s => s.Value).ToList();
+                XDocument doc = Product.LoadOrCreateDocument();
+                XElement storesRoot = Product.EnsureSection(doc, "Stores");
+                List<string> list = storesRoot.Elements("Store").Select(s => s.Value).ToList();
                 if (!list.Contains("Inne...")) list.Add("Inne...");
                 Stores = new ObservableCollection<string>(list);
             }
@@ -374,10 +374,10 @@ namespace ShoppingListPG4E.ViewModels
 
         private void SaveStores()
         {
-            var doc = Product.LoadOrCreateDocument();
-            var storesRoot = Product.EnsureSection(doc, "Stores");
+            XDocument doc = Product.LoadOrCreateDocument();
+            XElement storesRoot = Product.EnsureSection(doc, "Stores");
             storesRoot.RemoveAll();
-            foreach (var s in Stores)
+            foreach (string s in Stores)
                 storesRoot.Add(new XElement("Store", s));
             doc.Save(Path.Combine(FileSystem.AppDataDirectory, "ShoppingList.xml"));
         }
@@ -490,7 +490,7 @@ namespace ShoppingListPG4E.ViewModels
             OnPropertyChanged(nameof(Name));
             OnPropertyChanged(nameof(Unit));
             OnPropertyChanged(nameof(Category));
-            OnPropertyChanged(nameof(Store)); 
+            OnPropertyChanged(nameof(Store));
             OnPropertyChanged(nameof(Quantity));
             OnPropertyChanged(nameof(Purchased));
         }

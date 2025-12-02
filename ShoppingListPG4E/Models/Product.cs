@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Microsoft.Maui.Storage;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Microsoft.Maui.Storage;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ShoppingListPG4E.Models
 {
@@ -13,8 +14,7 @@ namespace ShoppingListPG4E.Models
     {
         public static string AppXmlPath => Path.Combine(FileSystem.AppDataDirectory, "ShoppingList.xml");
 
-
-        // Udostępnianie pliku do eksportu
+        //Sharing a file for export
         public static Task<Stream> OpenReadAsync()
         {
             Stream stream = File.OpenRead(AppXmlPath);
@@ -24,7 +24,7 @@ namespace ShoppingListPG4E.Models
         public static async Task ReplaceWithAsync(Stream source, CancellationToken cancellationToken = default)
         {
             Directory.CreateDirectory(FileSystem.AppDataDirectory);
-            await using var dst = File.Create(AppXmlPath);
+            await using FileStream dst = File.Create(AppXmlPath);
             await source.CopyToAsync(dst, cancellationToken);
         }
 
@@ -54,7 +54,7 @@ namespace ShoppingListPG4E.Models
             if (File.Exists(AppXmlPath))
                 return XDocument.Load(AppXmlPath);
 
-            var doc = new XDocument(
+            XDocument doc = new XDocument(
                 new XElement("ShoppingList",
                     new XElement("Categories",
                         new XElement("Category", "Nabiał"),
@@ -89,8 +89,8 @@ namespace ShoppingListPG4E.Models
 
         public static XElement EnsureSection(XDocument doc, string sectionName)
         {
-            var root = doc.Root!;
-            var section = root.Element(sectionName);
+            XElement root = doc.Root!;
+            XElement? section = root.Element(sectionName);
             if (section == null)
             {
                 section = new XElement(sectionName);
@@ -101,10 +101,10 @@ namespace ShoppingListPG4E.Models
 
         public void Save()
         {
-            var doc = LoadOrCreateDocument();
-            var productsRoot = EnsureSection(doc, "Products");
+            XDocument doc = LoadOrCreateDocument();
+            XElement productsRoot = EnsureSection(doc, "Products");
 
-            var existing = productsRoot.Elements("Product").FirstOrDefault(x => x.Attribute("Id")?.Value == Id);
+            XElement? existing = productsRoot.Elements("Product").FirstOrDefault(x => x.Attribute("Id")?.Value == Id);
             if (existing != null)
             {
                 existing.Element("Name")!.Value = Name;
@@ -136,10 +136,10 @@ namespace ShoppingListPG4E.Models
         {
             if (!File.Exists(AppXmlPath)) return;
 
-            var doc = XDocument.Load(AppXmlPath);
-            var productsRoot = EnsureSection(doc, "Products");
+            XDocument doc = XDocument.Load(AppXmlPath);
+            XElement productsRoot = EnsureSection(doc, "Products");
 
-            var node = productsRoot.Elements("Product").FirstOrDefault(x => x.Attribute("Id")?.Value == Id);
+            XElement? node = productsRoot.Elements("Product").FirstOrDefault(x => x.Attribute("Id")?.Value == Id);
             if (node != null)
             {
                 node.Remove();
@@ -149,22 +149,26 @@ namespace ShoppingListPG4E.Models
 
         public static Product Load(string id)
         {
-            var doc = LoadOrCreateDocument();
-            var productsRoot = EnsureSection(doc, "Products");
+            XDocument doc = LoadOrCreateDocument();
+            XElement productsRoot = EnsureSection(doc, "Products");
 
-            var node = productsRoot.Elements("Product").FirstOrDefault(x => x.Attribute("Id")?.Value == id);
+            XElement? node = productsRoot.Elements("Product").FirstOrDefault(x => x.Attribute("Id")?.Value == id);
             if (node == null)
                 return new Product { Id = id };
+
+            double q;
+            bool p;
+            bool o;
 
             return new Product
             {
                 Id = id,
                 Name = node.Element("Name")?.Value ?? string.Empty,
                 Unit = node.Element("Unit")?.Value ?? "szt.",
-                Quantity = double.TryParse(node.Element("Quantity")?.Value, out var q) ? q : 1,
-                Purchased = bool.TryParse(node.Element("Purchased")?.Value, out var p) && p,
+                Quantity = double.TryParse(node.Element("Quantity")?.Value, out q) ? q : 1,
+                Purchased = bool.TryParse(node.Element("Purchased")?.Value, out p) && p,
                 Category = node.Element("Category")?.Value ?? string.Empty,
-                Optional = bool.TryParse(node.Element("Optional")?.Value, out var o) && o,
+                Optional = bool.TryParse(node.Element("Optional")?.Value, out o) && o,
                 Store = node.Element("Store")?.Value ?? string.Empty
             };
         }
@@ -174,18 +178,18 @@ namespace ShoppingListPG4E.Models
             if (!File.Exists(AppXmlPath))
                 return new List<Product>();
 
-            var doc = XDocument.Load(AppXmlPath);
-            var productsRoot = EnsureSection(doc, "Products");
+            XDocument doc = XDocument.Load(AppXmlPath);
+            XElement productsRoot = EnsureSection(doc, "Products");
 
-            var products = productsRoot.Elements("Product").Select(node => new Product
+            IEnumerable<Product> products = productsRoot.Elements("Product").Select(node => new Product
             {
                 Id = node.Attribute("Id")?.Value ?? Guid.NewGuid().ToString(),
                 Name = node.Element("Name")?.Value ?? string.Empty,
                 Unit = node.Element("Unit")?.Value ?? "szt.",
-                Quantity = double.TryParse(node.Element("Quantity")?.Value, out var q) ? q : 1,
-                Purchased = bool.TryParse(node.Element("Purchased")?.Value, out var p) && p,
+                Quantity = double.TryParse(node.Element("Quantity")?.Value, out double q) ? q : 1,
+                Purchased = bool.TryParse(node.Element("Purchased")?.Value, out bool p) && p,
                 Category = node.Element("Category")?.Value ?? string.Empty,
-                Optional = bool.TryParse(node.Element("Optional")?.Value, out var o) && o,
+                Optional = bool.TryParse(node.Element("Optional")?.Value, out bool o) && o,
                 Store = node.Element("Store")?.Value ?? string.Empty
             });
 

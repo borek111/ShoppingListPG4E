@@ -20,7 +20,7 @@
     </ContentPage.ToolbarItems>
 
     <Grid RowDefinitions="Auto,*" Padding="12" RowSpacing="8">
-        <!-- Filtr sklepu -->
+        <!-- Shop Filter -->
         <HorizontalStackLayout Grid.Row="0" Spacing="8">
             <Label Text="Sklep:" VerticalTextAlignment="Center"/>
             <Picker Title="Wybierz sklep"
@@ -28,7 +28,7 @@
                     SelectedItem="{Binding SelectedStore, Mode=TwoWay}" />
         </HorizontalStackLayout>
 
-        <!-- Lista kategorii/produktów -->
+        <!-- Category/Product List -->
         <CollectionView Grid.Row="1" ItemsSource="{Binding Categories}">
             <CollectionView.ItemTemplate>
                 <DataTemplate>

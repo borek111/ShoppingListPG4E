@@ -46,7 +46,7 @@ namespace ShoppingListPG4E.ViewModels
 
         private void OpenAddProductPage()
         {
-            // przekazuj wybrany sklep, ale pomiń "Wszystkie" (brak filtra)
+            // pass selected store, but skip "Wszystkie" (no filter)
             var store = string.Equals(SelectedStore, "Wszystkie", StringComparison.OrdinalIgnoreCase) ? string.Empty : SelectedStore;
             var storeQuery = string.IsNullOrWhiteSpace(store) ? string.Empty : $"?store={Uri.EscapeDataString(store)}";
             Shell.Current.GoToAsync($"{nameof(ShoppingListPG4E.Views.ProductPage)}{storeQuery}");
@@ -93,7 +93,7 @@ namespace ShoppingListPG4E.ViewModels
                     Stores.Add(storeName);
             }
 
-            // jeśli SelectedStore nie jest na liście (np. po zmianach), ustaw "Wszystkie"
+            // if SelectedStore is not in the list (e.g. after changes), set it to "Wszystkie"
             if (!Stores.Contains(SelectedStore))
                 SelectedStore = "Wszystkie";
         }
@@ -136,14 +136,14 @@ namespace ShoppingListPG4E.ViewModels
         {
             var categoryToProductsMap = new Dictionary<string, List<ProductViewModel>>(StringComparer.OrdinalIgnoreCase);
 
-            // inicjalizuj wpisy dla zdefiniowanych kategorii
+            // initialize entries for defined categories
             foreach (var category in definedCategories)
             {
                 if (!categoryToProductsMap.ContainsKey(category))
                     categoryToProductsMap[category] = new List<ProductViewModel>();
             }
 
-            // rozdziel produkty do słownika, dodając brakujące kategorie
+            // separate products into dictionary, adding missing categories
             foreach (var productViewModel in products)
             {
                 var categoryName = string.IsNullOrWhiteSpace(productViewModel.Category) ? "Bez kategorii" : productViewModel.Category;

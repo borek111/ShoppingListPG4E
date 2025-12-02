@@ -12,7 +12,7 @@ namespace ShoppingListPG4E.Views
             base.OnAppearing();
             if (BindingContext is ShoppingListPG4E.ViewModels.ShoppingListViewModel vm)
             {
-                // odœwie¿ po powrocie na zak³adkê
+                // refresh after returning to the tab
                 vm.LoadShoppingItems();
             }
         }

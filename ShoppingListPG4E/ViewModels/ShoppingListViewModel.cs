@@ -40,7 +40,7 @@ namespace ShoppingListPG4E.ViewModels
             Items.Clear();
 
             var products = Models.Product.LoadAll()
-                .Where(p => !p.Purchased) // tylko niekupione
+                .Where(p => !p.Purchased) //only unpurchased
                 .Select(p => new ProductViewModel(p))
                 .ToList();
 
@@ -58,7 +58,7 @@ namespace ShoppingListPG4E.ViewModels
 
             foreach (var pv in ordered)
             {
-                // Po oznaczeniu jako kupiony – usuñ z widoku
+                // After marking as purchased - remove from view
                 pv.PurchasedChangedCallback = OnPurchasedChanged;
                 pv.DeletedCallback = OnDeleted;
                 Items.Add(pv);
@@ -67,7 +67,7 @@ namespace ShoppingListPG4E.ViewModels
 
         private void OnPurchasedChanged(ProductViewModel changed)
         {
-            // je¿eli zosta³ oznaczony jako kupiony – usuñ z listy
+            // if it was marked as purchased – remove from the list
             if (changed.Purchased)
             {
                 Items.Remove(changed);

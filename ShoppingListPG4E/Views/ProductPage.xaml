@@ -4,40 +4,39 @@
              xmlns:viewModels="clr-namespace:ShoppingListPG4E.ViewModels"
              x:Class="ShoppingListPG4E.Views.ProductPage">
 
-    <!-- Zasób: ViewModel produktu -->
+    <!-- Resource: Product ViewModel -->
     <ContentPage.Resources>
         <viewModels:ProductViewModel x:Key="Vm"/>
     </ContentPage.Resources>
 
-    <!-- Powiązanie kontekstu z ViewModelem -->
     <ContentPage.BindingContext>
         <StaticResource Key="Vm" />
     </ContentPage.BindingContext>
 
     <Grid Padding="12" RowSpacing="10" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*">
-        <!-- Pole: nazwa produktu -->
+        <!-- product name -->
         <Entry Grid.Row="0" Placeholder="Nazwa" Text="{Binding Name, Mode=TwoWay}" />
 
-        <!-- Pole: ilość -->
+        <!-- quantity -->
         <Entry Grid.Row="1" Placeholder="Ilość" Keyboard="Numeric" Text="{Binding Quantity, Mode=TwoWay}" />
 
-        <!-- Pole: jednostka -->
+        <!--unit -->
         <Picker Grid.Row="2" Title="Jednostka" ItemsSource="{Binding Units}" SelectedItem="{Binding Unit, Mode=TwoWay}" />
 
-        <!-- Pole: kategoria -->
+        <!-- category -->
         <Picker Grid.Row="3" Title="Kategoria" ItemsSource="{Binding Categories}" SelectedItem="{Binding Category, Mode=TwoWay}" />
 
-        <!-- Pole: sklep -->
+        <!-- Pole: shop -->
         <Picker Grid.Row="4" Title="Sklep" ItemsSource="{Binding Stores}" SelectedItem="{Binding Store, Mode=TwoWay}" />
 
-        <!-- Przełącznik: pozycja opcjonalna -->
+        <!--optional -->
         <Switch Grid.Row="5" IsToggled="{Binding Optional, Mode=TwoWay}">
             <Switch.Triggers>
                 <DataTrigger TargetType="Switch" Binding="{Binding Optional}" Value="True" />
             </Switch.Triggers>
         </Switch>
 
-        <!-- Akcje: Zapisz / Anuluj -->
+        <!-- Actions: Save / Cancel -->
         <HorizontalStackLayout Grid.Row="6" Spacing="10">
             <Button Text="Zapisz" Command="{Binding AddCommand}" />
             <Button Text="Anuluj" Command="{Binding CancelCommand}" />

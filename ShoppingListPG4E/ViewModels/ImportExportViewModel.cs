@@ -47,7 +47,7 @@ namespace ShoppingListPG4E.ViewModels
             }
             catch (Exception ex)
             {
-                Status = $"B³¹d eksportu: {ex.Message}";
+                Status = $"B³ad eksportu: {ex.Message}";
             }
         }
 
