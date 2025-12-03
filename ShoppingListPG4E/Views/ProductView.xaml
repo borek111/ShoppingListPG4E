@@ -45,9 +45,13 @@
             <HorizontalStackLayout Spacing="6"
                                    VerticalOptions="Center"
                                    HorizontalOptions="Center">
+                
                 <Label Text="Kupione:" VerticalTextAlignment="Center" Margin="0,0,4,0" />
                 <CheckBox IsChecked="{Binding Purchased, Mode=TwoWay}" />
                 <Button Text="Usuń" Command="{Binding DeleteCommand}" WidthRequest="64"/>
+                <Button Text="-" Command="{Binding DecreaseCommand}" HorizontalOptions="FillAndExpand" HeightRequest="40"/>
+                <Button Text="+" Command="{Binding IncreaseCommand}" HorizontalOptions="FillAndExpand"
+                  HeightRequest="40"/>
             </HorizontalStackLayout>
 
         </VerticalStackLayout>
