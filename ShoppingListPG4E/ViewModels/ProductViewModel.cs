@@ -129,6 +129,9 @@ namespace ShoppingListPG4E.ViewModels
             }
         }
 
+        public double Opacity => Purchased ? 0.35 : 1.0;
+
+
         public string Store
         {
             get => _product.Store;
@@ -162,12 +165,9 @@ namespace ShoppingListPG4E.ViewModels
             get => _product.Quantity;
             set
             {
-                if (Math.Abs(_product.Quantity - value) > 1e-6)
-                {
-                    _product.Quantity = value;
-                    _product.Save();
-                    OnPropertyChanged();
-                }
+                _product.Quantity = value;
+                _product.Save();
+                OnPropertyChanged();  
             }
         }
 
@@ -181,6 +181,7 @@ namespace ShoppingListPG4E.ViewModels
                     _product.Purchased = value;
                     _product.Save();
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(Opacity));
                     PurchasedChangedCallback?.Invoke(this);
                 }
             }
@@ -493,6 +494,7 @@ namespace ShoppingListPG4E.ViewModels
             OnPropertyChanged(nameof(Store));
             OnPropertyChanged(nameof(Quantity));
             OnPropertyChanged(nameof(Purchased));
+            OnPropertyChanged(nameof(Opacity));
         }
     }
 }

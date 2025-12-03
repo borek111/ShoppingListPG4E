@@ -2,16 +2,11 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:ShoppingListPG4E.ViewModels"
-             xmlns:conv="clr-namespace:ShoppingListPG4E.Converters"
              xmlns:views="clr-namespace:ShoppingListPG4E.Views"
              x:Class="ShoppingListPG4E.Views.CategoryView"
              x:DataType="vm:CategoryViewModel">
 
-    <ContentView.Resources>
-        <ResourceDictionary>
-            <conv:BoolToOpacityConverter x:Key="BoolToOpacityConverter" />
-        </ResourceDictionary>
-    </ContentView.Resources>
+
 
     <Frame HasShadow="True" CornerRadius="8" Padding="10" Margin="0,4">
         <VerticalStackLayout Spacing="6">

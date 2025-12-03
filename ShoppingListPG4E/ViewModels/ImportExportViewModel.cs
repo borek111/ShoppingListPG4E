@@ -18,7 +18,15 @@ namespace ShoppingListPG4E.ViewModels
         public string Status
         {
             get => _status;
-            set => SetProperty(ref _status, value);
+            set
+            {
+                if (_status != value)
+                {
+                    _status = value;
+                    OnPropertyChanged(nameof(Status));
+                }
+                
+            }
         }
 
         public ICommand ExportCommand { get; }

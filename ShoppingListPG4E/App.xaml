@@ -8,9 +8,6 @@
     <Application.Resources>
         <ResourceDictionary>
 
-            <!-- Register converters and other objects directly in the ResourceDictionary -->
-            <converters:BoolToOpacityConverter x:Key="BoolToOpacityConverter" />
-
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
