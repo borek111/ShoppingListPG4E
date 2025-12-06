@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:ShoppingListPG4E.ViewModels"
+             x:Class="ShoppingListPG4E.Views.ProductPage">
+
+    <ContentPage.Resources>
+        <viewModels:ProductViewModel x:Key="Vm" />
+    </ContentPage.Resources>
+    <ContentPage.BindingContext>
+        <StaticResource Key="Vm" />
+    </ContentPage.BindingContext>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="12">
+
+            <Entry Placeholder="Nazwa produktu" Text="{Binding Name, Mode=TwoWay}" />
+
+            <Label Text="Kategoria:" />
+            <Picker Title="Wybierz kategorię"
+                    ItemsSource="{Binding Categories}"
+                    SelectedItem="{Binding Category, Mode=TwoWay}" />
+
+            <Label Text="Jednostka:" />
+            <Picker Title="Wybierz jednostkę"
+                    ItemsSource="{Binding Units}"
+                    SelectedItem="{Binding Unit, Mode=TwoWay}" />
+
+            <Grid ColumnDefinitions="50,*,50" ColumnSpacing="8">
+                <Button Grid.Column="0" Text="-" Command="{Binding DecreaseCommand}" HeightRequest="40" />
+                <Entry Grid.Column="1" Text="{Binding Quantity, Mode=TwoWay}" Keyboard="Numeric" HorizontalTextAlignment="Center" HeightRequest="40" />
+                <Button Grid.Column="2" Text="+" Command="{Binding IncreaseCommand}" HeightRequest="40" />
+            </Grid>
+
+            <Label Text="Sklep" />
+            <Picker Title="Sklep"
+                    ItemsSource="{Binding Stores}"
+                    SelectedItem="{Binding Store}" />
+
+            <HorizontalStackLayout Spacing="8" Margin="0,6,0,0">
+                <Label Text="Opcjonalny:" VerticalTextAlignment="Center"/>
+                <Switch IsToggled="{Binding Optional, Mode=TwoWay}" />
+            </HorizontalStackLayout>
+
+            <HorizontalStackLayout Spacing="10" Margin="0,10,0,0" HorizontalOptions="Fill">
+                <Button Text="Dodaj produkt" Command="{Binding AddCommand}" HorizontalOptions="FillAndExpand"/>
+                <Button Text="Anuluj dodawanie" Command="{Binding CancelCommand}" HorizontalOptions="FillAndExpand"/>
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:ShoppingListPG4E.ViewModels"
+             xmlns:views="clr-namespace:ShoppingListPG4E.Views"
+             x:Class="ShoppingListPG4E.Views.CategoryView"
+             x:DataType="vm:CategoryViewModel">
+
+
+
+    <Frame HasShadow="True" CornerRadius="8" Padding="10" Margin="0,4">
+        <VerticalStackLayout Spacing="6">
+
+            <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                    <Label Text="{Binding Name}" FontSize="18" />
+                    <Label Text="(" />
+                    <Label Text="{Binding Products.Count}" />
+                    <Label Text=")" />
+                </HorizontalStackLayout>
+
+                <Button Grid.Column="1"
+                        Command="{Binding ToggleExpandCommand}"
+                        WidthRequest="40" HeightRequest="40">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding IsExpanded}" Value="True">
+                            <Setter Property="Text" Value="▾" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Button" Binding="{Binding IsExpanded}" Value="False">
+                            <Setter Property="Text" Value="▸" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+            </Grid>
+
+            <CollectionView ItemsSource="{Binding Products}"
+                            IsVisible="{Binding IsExpanded}"
+                            SelectionMode="None"
+                            Margin="0,6,0,0">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="6"/>
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ProductViewModel">
+                        <views:ProductView />
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </Frame>
+</ContentView>

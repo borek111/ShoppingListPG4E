@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:ShoppingListPG4E.ViewModels"
+             xmlns:views="clr-namespace:ShoppingListPG4E.Views"
+             x:Class="ShoppingListPG4E.Views.AllProductsPage">
+
+    <ContentPage.Resources>
+        <viewModels:AllProductsViewModel x:Key="Vm"/>
+    </ContentPage.Resources>
+    <ContentPage.BindingContext>
+        <StaticResource Key="Vm" />
+    </ContentPage.BindingContext>
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Dodaj"
+                     Priority="0"
+                     Order="Primary"
+                     Command="{Binding NewCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,*" Padding="12" RowSpacing="8">
+        <!-- Shop Filter -->
+        <HorizontalStackLayout Grid.Row="0" Spacing="8">
+            <Label Text="Sklep:" VerticalTextAlignment="Center"/>
+            <Picker Title="Wybierz sklep"
+                    ItemsSource="{Binding Stores}"
+                    SelectedItem="{Binding SelectedStore, Mode=TwoWay}" />
+        </HorizontalStackLayout>
+
+        <!-- category and product list -->
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Categories}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <views:CategoryView />
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

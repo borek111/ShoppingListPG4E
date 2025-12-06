@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="ShoppingListPG4E.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:ShoppingListPG4E"
+    xmlns:views="clr-namespace:ShoppingListPG4E.Views"
+    Shell.FlyoutBehavior="Disabled"
+    Title="ShoppingListPG4E">
+
+    <TabBar>
+        <ShellContent Title="Produkty według kategorii" 
+                  ContentTemplate="{DataTemplate views:AllProductsPage}" />
+        <ShellContent Title="Lista do sklepu" 
+                  ContentTemplate="{DataTemplate views:ShoppingListPage}" />
+        <ShellContent Title="Import/Export List" 
+                  ContentTemplate="{DataTemplate views:ImportAndExportPage}" />
+    </TabBar>
+</Shell>
